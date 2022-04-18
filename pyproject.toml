@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "yt-issues"
+name = "ytissues"
 version = "0.1.0"
 description = ""
 authors = ["Karsten Schulz <github@karstenschulz.biz>"]
