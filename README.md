@@ -5,7 +5,25 @@ Command line tool `yt` to retrieve and export issues from a
 ## Roadmap
 
 ### Version 0.1.0 (MVP, in development)
-- `yt backup YT_BACKUP_DIR` - Download all issues with attachments of all project to subdirs in YT_BACKUP_DIR.
+`yt backup YT_BACKUP_DIR` - Download all issues with attachments of all project to subdirs in YT_BACKUP_DIR in a readable format, which means markdown files with attachments in their corresponding attachment directories.
+
+If for example the issue WD-1 in the only project World Domination has a PDF file `Roadmap to World Domination.pdf` and an image `screenshot presidents pc.png` and the issue WD-2 has no attachments, the workflow and the downloaded structure of this will be:
+
+```shell
+donald$ yt backup all_issues
+# Downloading issue data ...
+donald$ tree all_issues/
+all_issues/
+└── World Domination
+    ├── wd-1
+    │   ├── wd-1.md
+    │   └── wd-1_attachments
+    │       ├── Roadmap to World Domination.pdf
+    │       └── screenshot presidents pc.png
+    └── wd-2
+        └── wd-2.md
+```
+Links in the markdown files will be adjusted accordingly, so that they remain accessible.
 
 ### Version 0.2.0
 - `yt ls [-s | --with-solved ] [PROJECT]` - if no PROJECT given: list all open projects, otherwise list open (or all) issues of PROJECT to stdout (ID, Title, State).
