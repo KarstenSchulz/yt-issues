@@ -131,3 +131,4 @@ dmypy.json
 .pyre/
 /local/
 /Explore YT API.http
+/http-client.private.env.json
