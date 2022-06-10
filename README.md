@@ -52,3 +52,6 @@ YT_AUTH=perm:ABCD42efg... YT_URL=https://... yt
 ## YouTrack REST API
 
 See the documentation at https://www.jetbrains.com/help/youtrack/devportal/api-getting-started.html
+
+## Dependencies
+- [rich](https://pypi.org/project/rich/) - *Rich is a Python library for rich text and beautiful formatting in the terminal.*
