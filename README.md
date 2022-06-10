@@ -1,5 +1,5 @@
 # yt-issues
-Command line tool to retrieve and export issues from a
+Command line tool `yt` to retrieve and export issues from a
 [YouTrack](https://www.jetbrains.com/youtrack/) service.
 
 ## Roadmap
@@ -15,4 +15,22 @@ Command line tool to retrieve and export issues from a
 - `yt -q {query}` - execute the YouTrack query and retrieve results as json to stdout.
 
 ### Version 0.4.0
-- `yt gt [ -l LIST | --list=LIST ] ID [ID ...]` - Add issue ID to the MacOS GoodTask App to the reminders standard list or to the LIST.
+- `yt gt [ -l LIST | --list=LIST ] ID [ID ...]` - Add issue ID to the [MacOS GoodTask App](https://goodtaskapp.com) to the reminders standard list or to the named LIST.
+
+## Get started
+
+First generate a permanent token to authorize against your youtrack service as described in https://www.jetbrains.com/help/youtrack/devportal/Manage-Permanent-Token.html.
+
+The token must be stored in the environment variable YT_AUTH when running the command `yt`.
+If you use the bash shell, enter a line like `export YT_AUTH=perm:ABCD42efg...` in your startup script.
+
+You must also set the environment variable YT_URL to the base URL of your YouTrack service as described in https://www.jetbrains.com/help/youtrack/devportal/api-url-and-endpoints.html.
+
+You can also set the environment on the command line when calling the command like so:
+```shell
+YT_AUTH=perm:ABCD42efg... YT_URL=https://... yt
+```
+
+## YouTrack REST API
+
+See the documentation at https://www.jetbrains.com/help/youtrack/devportal/api-getting-started.html
