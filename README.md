@@ -5,7 +5,7 @@ Command line tool to retrieve and export issues from a
 ## Roadmap
 
 ### Version 0.1.0 (MVP, in development)
-- `yt backup` - Download all issues with attachments of all project to directories in YT_BACKUP_DIR.
+- `yt backup YT_BACKUP_DIR` - Download all issues with attachments of all project to subdirs in YT_BACKUP_DIR.
 
 ### Version 0.2.0
 - `yt ls [-s | --with-solved ] [PROJECT]` - if no PROJECT given: list all open projects, otherwise list open (or all) issues of PROJECT to stdout (ID, Title, State).
