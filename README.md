@@ -63,3 +63,4 @@ For the development:
 - isort
 - pre-commit
 - pytest
+- coverage
