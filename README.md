@@ -1,5 +1,5 @@
 # yt-issues
-Command line tool `yt` to retrieve and export issues from a
+Command line tool `yt` to retrieve and backup issues from a
 [YouTrack](https://www.jetbrains.com/youtrack/) service.
 
 ## Roadmap
@@ -55,3 +55,11 @@ See the documentation at https://www.jetbrains.com/help/youtrack/devportal/api-g
 
 ## Dependencies
 - [rich](https://pypi.org/project/rich/) - *Rich is a Python library for rich text and beautiful formatting in the terminal.*
+
+For the development:
+
+- black
+- flake8
+- isort
+- pre-commit
+- pytest
