@@ -59,12 +59,37 @@ def print_as_table(projects: list[Project]):
     console.print(table)
 
 
-def get_projects() -> list[Project]:
+def get_request(resource: str, query: str) -> Request:
+    """Return a Request object for the YT service.
+
+    Args:
+        resource: The api resource, for example `/api/admin/projects`
+        query: The GET query string, for example `?fields=id,name,shortName'
+
+    Returns:
+        The Request object, ready to use, with headers set.
+
+    Raises:
+        KeyError, if environment variables YT_URL or YT_AUTH are missing.
+        ValueError, if some of the data is malformed.
+    """
+    # check some data:
     yt_url = os.environ["YT_URL"]
     yt_auth = os.environ["YT_AUTH"]
-    url = f"{yt_url}{Project.resource}?fields=id,name,shortName"
+    if yt_url.endswith("/"):
+        raise ValueError(f"YT_URL must not end with '/': {yt_url}")
+    if not resource.startswith("/"):
+        raise ValueError(f"Resource must start with '/': {resource}")
+    if query.startswith("?"):
+        raise ValueError(f"Query must not start with '?': {query}")
+
+    url = f"{yt_url}{resource}?{query}"
     headers = {"Accept": "application/json", "Authorization": f"Bearer {yt_auth}"}
-    request = Request(url, headers=headers)
+    return Request(url, headers=headers)
+
+
+def get_projects() -> list[Project]:
+    request = get_request(Project.resource, "fields=id,name,shortName")
     opened_url = urlopen(request)
     if opened_url.getcode() == 200:
         data = opened_url.read()

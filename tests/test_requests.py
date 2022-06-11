@@ -1,6 +1,10 @@
 """Test request objects, urls and mocked API calls."""
 import os
 
+import pytest
+
+from ytissues.ytlib import get_request
+
 project_list_api = [
     {"shortName": "AB", "name": "ab", "id": "0-16", "$type": "Project"},
     {"shortName": "BC", "name": "bc", "id": "0-6", "$type": "Project"},
@@ -21,3 +25,23 @@ class TestGetProjects:
     def test_test_environment_is_set(self):
         assert os.environ["YT_URL"] == "https://not.a.valid.host/to_test/youtrack"
         assert os.environ["YT_AUTH"] == "perm:not-a-valid-authorization"
+
+    @pytest.fixture
+    def yt_url(self):
+        return os.environ["YT_URL"]
+
+    @pytest.fixture
+    def yt_auth(self):
+        return os.environ["YT_AUTH"]
+
+    def test_get_request_raises_missing_slash(self, yt_url, yt_auth):
+        with pytest.raises(ValueError):
+            get_request("resource", "query")
+
+    def test_get_request_raises_question_mark(self, yt_url, yt_auth):
+        with pytest.raises(ValueError):
+            get_request("/resource", "?query")
+
+    def test_get_request_correct_url(self, yt_url, yt_auth):
+        request = get_request("/resource", "query")
+        assert request.full_url == f"{yt_url}/resource?query"
