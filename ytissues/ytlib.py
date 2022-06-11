@@ -9,6 +9,10 @@ import json
 import os
 from urllib.request import Request, urlopen
 
+from rich import box
+from rich.console import Console
+from rich.table import Table
+
 
 class Project:
     """Contains all important data on a project and methods to backup."""
@@ -40,8 +44,19 @@ def backup(args):
     raise NotImplementedError
 
 
-def print_as_table(project_list):
-    raise NotImplementedError
+def print_as_table(project_list: list[Project]):
+    table = Table(
+        title="List of projects",
+        caption=f"{len(project_list)} projects in total",
+        box=box.ROUNDED,
+    )
+    table.add_column("ID", justify="right", no_wrap=True)
+    table.add_column("Short Name", no_wrap=True)
+    table.add_column("Name", no_wrap=True)
+    for project in project_list:
+        table.add_row(project.project_id, project.shortname, project.name)
+    console = Console()
+    console.print(table)
 
 
 def get_projects() -> list[Project]:
