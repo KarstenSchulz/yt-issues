@@ -44,16 +44,16 @@ def backup(args):
     raise NotImplementedError
 
 
-def print_as_table(project_list: list[Project]):
+def print_as_table(projects: list[Project]):
     table = Table(
         title="List of projects",
-        caption=f"{len(project_list)} projects in total",
+        caption=f"{len(projects)} projects in total",
         box=box.ROUNDED,
     )
     table.add_column("ID", justify="right", no_wrap=True)
     table.add_column("Short Name", no_wrap=True)
     table.add_column("Name", no_wrap=True)
-    for project in project_list:
+    for project in projects:
         table.add_row(project.project_id, project.shortname, project.name)
     console = Console()
     console.print(table)
