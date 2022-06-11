@@ -7,7 +7,7 @@ Get data from https://www.jetbrains.com/help/youtrack/devportal/youtrack-rest-ap
 import argparse
 import json
 import os
-from urllib.request import Request, urlopen
+from urllib import request
 
 from rich import box
 from rich.console import Console
@@ -34,6 +34,13 @@ class Project:
     def __str__(self) -> str:
         return self.displayname
 
+    def __eq__(self, other):
+        return (
+            (self.project_id == other.project_id)
+            and (self.shortname == other.shortname)
+            and (self.name == other.name)
+        )
+
     def as_plaintext(self) -> str:
         """Return one line for ls command."""
         return f"{self.project_id} {self.shortname} {self.name}"
@@ -59,7 +66,7 @@ def print_as_table(projects: list[Project]):
     console.print(table)
 
 
-def get_request(resource: str, query: str) -> Request:
+def get_request(resource: str, query: str) -> request.Request:
     """Return a Request object for the YT service.
 
     Args:
@@ -85,12 +92,12 @@ def get_request(resource: str, query: str) -> Request:
 
     url = f"{yt_url}{resource}?{query}"
     headers = {"Accept": "application/json", "Authorization": f"Bearer {yt_auth}"}
-    return Request(url, headers=headers)
+    return request.Request(url, headers=headers)
 
 
 def get_projects() -> list[Project]:
-    request = get_request(Project.resource, "fields=id,name,shortName")
-    opened_url = urlopen(request)
+    the_request = get_request(Project.resource, "fields=id,name,shortName")
+    opened_url = request.urlopen(the_request)
     if opened_url.getcode() == 200:
         data = opened_url.read()
         json_data = json.loads(data)
