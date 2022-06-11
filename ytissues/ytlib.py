@@ -1,45 +1,85 @@
-"""Library for retrieving issues from the youtrack service."""
+"""
+Library for retrieving issues from the youtrack service.
+
+Get data from https://www.jetbrains.com/help/youtrack/devportal/youtrack-rest-api.html
+
+"""
 import argparse
+import json
 import os
-import sys
-
-from rich import print
+from urllib.request import Request, urlopen
 
 
-def ls(args) -> int:
+class Project:
+    """Contains all important data on a project and methods to backup."""
+
+    resource: str = "/api/admin/projects"
+
+    def __init__(self, project_id: str, shortname: str = None, name: str = None):
+        self.project_id = project_id or None
+        self.shortname = shortname or None
+        self.name = name or None
+        if shortname:
+            self.displayname = shortname
+        elif name:
+            self.displayname = name
+        else:
+            self.displayname = project_id
+        self.issues = []
+
+    def __str__(self) -> str:
+        return self.displayname
+
+    def as_plaintext(self) -> str:
+        """Return one line for ls command."""
+        return f"{self.project_id} {self.shortname} {self.name}"
+
+
+def backup(args):
     """Implements ls sub-command and lists project names or issues"""
-    print(args)
-    return 0
+    raise NotImplementedError
 
 
-def cp(args) -> int:
-    """Implements cp sub-command and copies issues to a local directory"""
-    print(args)
-    return 0
+def print_as_table(project_list):
+    raise NotImplementedError
 
 
-def get_access_information() -> (str, str):
-    """Retrieve the YouTrack service url and the auth token from the environment.
+def get_projects() -> list[Project]:
+    yt_url = os.environ["YT_URL"]
+    yt_auth = os.environ["YT_AUTH"]
+    url = f"{yt_url}{Project.resource}?fields=id,name,shortName"
+    headers = {"Accept": "application/json", "Authorization": f"Bearer {yt_auth}"}
+    request = Request(url, headers=headers)
+    opened_url = urlopen(request)
+    if opened_url.getcode() == 200:
+        data = opened_url.read()
+        json_data = json.loads(data)
+        projects = []
+        for item in json_data:
+            projects.append(
+                Project(
+                    project_id=item["id"],
+                    shortname=item["shortName"],
+                    name=item["name"],
+                )
+            )
+        return projects
+    else:
+        print("Error receiving data", opened_url.getcode())
+        return []
 
-    :returns a tuple of strings (URL, AUTH-TOKEN)
-    :raises: KeyError, if YT_URL or YT_AUTH is not set.
-    """
-    try:
-        yt_url = os.environ["YT_URL"]
-        yt_auth = os.environ["YT_AUTH"]
-    except KeyError:
-        print(
-            "[bold red]Make sure, the the environment variable YT_URL is set "
-            "to the service url and YT_AUTH is set to a valid authorization "
-            "token.[/bold red]",
-            file=sys.stderr,
-        )
-        raise
-    return yt_url, yt_auth
+
+def ls(args):
+    """List all projects on stdout."""
+    project_list = get_projects()
+    if args.plain:
+        for project in project_list:
+            print(project.as_plaintext())
+    else:
+        print_as_table(project_list)
 
 
 def main():
-    yt_url, yt_auth = get_access_information()
     parser = argparse.ArgumentParser()
     subparsers = parser.add_subparsers(
         description="Use the following commands to retrieve project names or issues "
@@ -47,44 +87,30 @@ def main():
         metavar="COMMAND",
         required=True,
     )
-
+    backup_parser = subparsers.add_parser(
+        "backup", help="Backup all issues of all project with all attachments."
+    )
+    backup_parser.add_argument(
+        "backup-dir",
+        metavar="YT_BACKUP_DIR",
+        help="The root directory to store all tickets.",
+    )
+    backup_parser.add_argument(
+        "-p",
+        "--project-id",
+        metavar="PROJECT_ID",
+        help="Project ID to backup (eg '0-42'). If ommited, all projects are saved.",
+    )
+    backup_parser.set_defaults(func=backup)
     ls_parser = subparsers.add_parser(
-        "ls",
-        help="List projects or issues from a YouTrack service.",
+        "ls", help="List all projects as table on stdout."
     )
     ls_parser.add_argument(
-        "-s",
-        "--with-solved",
+        "-p",
+        "--plain",
         action="store_true",
-        help="If given, retrieve solved issues and closed projects, too.",
-    )
-    ls_parser.add_argument(
-        "project",
-        metavar="PROJECT",
-        nargs="?",
-        default=None,
-        help="List the issues of PROJECT. If omitted, list project names.",
+        help="Print project information as plain lines to stdout (not as a table).",
     )
     ls_parser.set_defaults(func=ls)
-
-    cp_parser = subparsers.add_parser(
-        "cp",
-        help="Copy issue(s) to DESTDIR.",
-        epilog="""
-        Make sure, the the environment variable YT_ISSUE_ACCESS_AUTH is set to
-        a valid authorization token.""",
-    )
-    cp_parser.add_argument(
-        "src",
-        metavar="SRC",
-        nargs="+",
-        help="SRC can be a project name (copies all issues of the project)"
-        + " or an issue id.",
-    )
-    cp_parser.add_argument(
-        "destdir", metavar="DESTDIR", help="Destination directory for the copied data."
-    )
-    cp_parser.set_defaults(func=cp)
-    parser.set_defaults(yt_url=yt_url, yt_auth=yt_auth)
     args = parser.parse_args()
-    return args.func(args)
+    args.func(args)
