@@ -4,10 +4,10 @@ from urllib import request
 
 import pytest
 
-from ytissues.ytlib import Project, get_projects, get_request
+from ytissues.ytlib import get_projects, get_request
 
 
-class MockResponse:
+class MockResponseWithProjects:
     project_list_api = """
     [
   {
@@ -87,7 +87,17 @@ class MockResponse:
 
     @staticmethod
     def read():
-        return MockResponse.project_list_api
+        return MockResponseWithProjects.project_list_api
+
+    @staticmethod
+    def getcode():
+        return 200
+
+
+class MockedResponseEmptyProjectList:
+    @staticmethod
+    def read():
+        return "[]"
 
     @staticmethod
     def getcode():
@@ -121,11 +131,30 @@ class TestGetProjects:
 
     def test_get_projects(self, monkeypatch):
         def mock_urlopen(*args, **kwargs):
-            return MockResponse()
+            return MockResponseWithProjects()
 
         monkeypatch.setattr(request, "urlopen", mock_urlopen)
         projects = get_projects()
-        p1 = Project(project_id="0-16", shortname="BD", name="bd")
-        assert p1 == projects[0]
-        p2 = Project(project_id="0-15", shortname="NORTH", name="north")
-        assert p2 == projects[11]
+        assert projects[0].project_id == "0-16"
+        assert projects[0].shortname == "BD"
+        assert projects[0].name == "bd"
+        assert projects[1].project_id == "0-6"
+        assert projects[1].shortname == "COM"
+        assert projects[1].name == "com"
+
+    def test_get_projects_list_len_is_correct(self, monkeypatch):
+        def mock_urlopen(*args, **kwargs):
+            return MockResponseWithProjects()
+
+        monkeypatch.setattr(request, "urlopen", mock_urlopen)
+        projects = get_projects()
+        assert len(projects) == 12
+
+    def test_get_empty_project_list_succeeds(self, monkeypatch):
+        def mock_urlopen(*args, **kwargs):
+            return MockedResponseEmptyProjectList()
+
+        monkeypatch.setattr(request, "urlopen", mock_urlopen)
+        projects = get_projects()
+        assert isinstance(projects, list)
+        assert len(projects) == 0
