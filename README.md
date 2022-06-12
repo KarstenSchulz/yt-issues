@@ -2,10 +2,30 @@
 Command line tool `yt` to retrieve and backup issues from a
 [YouTrack](https://www.jetbrains.com/youtrack/) service.
 
+The aim of this tool is not to create a backup to ensure availability of data.
+For that, you should use the backup function of the youtrack service, see https://www.jetbrains.com/help/youtrack/incloud/Database.html#export-youtrack-database-incloud for cloud services or https://www.jetbrains.com/help/youtrack/standalone/Back-Up-the-Database.html for on premise installations.
+
+This tool is to generate local markdown files with ticket information and comments and the attachments, so that the information can be viewed with a local markdown app or can be greped in the filesystem.
+After a backup, you can use and manipulate the data with standard file-based tool and commands.
+No need for a running server.
+
+For that, text and comments of issues will be slightly reformatted and stored into markdown files.
+Attachments of the issues will be stored accordingly in corresponding folders.
+Markdown links to the attachments are converted, so that they are usable in the local copy.
+
+This can be useful for:
+- To have a local archive, which is grepable.
+- To have fast access to attachments without waiting for downloads (I live in germany 🙄).
+- To have access to the most important data in case of service failure.
+- To have an offline local copy for outages of the service (planned or unplanned).
+- To have a copy of the data on mobile devices without online access.
+- ...
+
 ## Roadmap
 
 ### Version 0.1.0 (MVP, in development)
-`yt backup YT_BACKUP_DIR` - Download all issues with attachments of all project to subdirs in YT_BACKUP_DIR in a readable format, which means markdown files with attachments in their corresponding attachment directories.
+- `yt ls PROJECT [PROJECT ...]` - if no PROJECT given: list all open projects, otherwise list open (or all) issues of PROJECT to stdout (ID, Title, State).
+- `yt backup YT_BACKUP_DIR` - Download all issues with attachments of all project to subdirs in YT_BACKUP_DIR in a readable format, which means markdown files with attachments in their corresponding attachment directories.
 
 If for example the issue WD-1 in the only project World Domination has a PDF file `Roadmap to World Domination.pdf` and an image `screenshot presidents pc.png` and the issue WD-2 has no attachments, the workflow and the downloaded structure of this will be:
 
@@ -26,7 +46,7 @@ all_issues/
 Links in the markdown files will be adjusted accordingly, so that they remain accessible.
 
 ### Version 0.2.0
-- `yt ls [-s | --with-solved ] [PROJECT]` - if no PROJECT given: list all open projects, otherwise list open (or all) issues of PROJECT to stdout (ID, Title, State).
+
 - `yt cp SRC [SRC ...] DESTDIR` - download issues with comments and attachments to DESTDIR as markdown files and attachments in a sub directory. If SRC is a project name, download all issues of the project. If SRC is an issue id, download that id.
 
 ### Version 0.3.0
