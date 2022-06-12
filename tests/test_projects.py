@@ -27,8 +27,8 @@ class TestProject:
     ]
 
     def test_plain_text(self):
-        p = Project("P_ID", "P_SHORT", "P_NAME")
-        assert p.as_plaintext() == "P_ID P_SHORT P_NAME"
+        p = Project("P_ID")
+        assert p.as_plaintext() == "P_ID None None"
 
     @pytest.mark.parametrize("init, result", data_displaynames)
     def test_displayname_text(self, init, result):
