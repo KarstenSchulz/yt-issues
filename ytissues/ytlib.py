@@ -62,6 +62,19 @@ def print_as_table(projects: list[Project]):
     console.print(table)
 
 
+def print_as_list(projects: list[Project]):
+    for project in projects:
+        print(project.as_plaintext())
+
+
+def list_projects(plain_list: bool):
+    project_list = get_projects()
+    if plain_list:
+        print_as_list(project_list)
+    else:
+        print_as_table(project_list)
+
+
 def get_request(resource: str, query: str) -> request.Request:
     """Return a Request object for the YT service.
 
@@ -113,13 +126,12 @@ def get_projects() -> list[Project]:
 
 
 def ls(args):
-    """List all projects on stdout."""
-    project_list = get_projects()
-    if args.plain:
-        for project in project_list:
-            print(project.as_plaintext())
-    else:
-        print_as_table(project_list)
+    """List all or print a concrete project on stdout."""
+    if args.project_id is None:
+        list_projects(args.plain)
+    else:  # list a concrete project
+        project = Project(args.project_id)
+        project.print(plain=args.plain)
 
 
 def main():
@@ -146,13 +158,23 @@ def main():
     )
     backup_parser.set_defaults(func=backup)
     ls_parser = subparsers.add_parser(
-        "ls", help="List all projects as table on stdout."
+        "ls",
+        help="List all projects as table on stdout.",
+        description="If run without options, "
+        "list all projects with ID, shortname and name.",
     )
     ls_parser.add_argument(
         "-p",
         "--plain",
         action="store_true",
         help="Print project information as plain lines to stdout (not as a table).",
+    )
+    ls_parser.add_argument(
+        "-i",
+        "--project_id",
+        metavar="PROJECT_ID",
+        nargs="*",
+        help="List issues of the given PROJECT_IDs.",
     )
     ls_parser.set_defaults(func=ls)
     args = parser.parse_args()
