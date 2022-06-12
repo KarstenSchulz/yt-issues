@@ -15,9 +15,14 @@ from rich.table import Table
 
 
 class Project:
-    """Contains all important data on a project and methods to backup."""
+    """Contains all important data on a project and methods to backup.
 
-    resource: str = "/api/admin/projects"
+    Loads lazy. We hit the API only, when data for example issues is requested.
+
+    """
+
+    get_list: str = "/api/admin/projects"
+    get_item: str = "/api/admin/projects/{project_id}"
 
     def __init__(self, project_id: str, shortname: str = None, name: str = None):
         self.project_id = project_id or None
@@ -29,7 +34,7 @@ class Project:
             self.displayname = name
         else:
             self.displayname = project_id
-        self.issues = []
+        self._issues = None
 
     def __str__(self) -> str:
         return self.displayname
@@ -40,6 +45,11 @@ class Project:
     def as_plaintext(self) -> str:
         """Return one line for ls command."""
         return f"{self.project_id} {self.shortname} {self.name}"
+
+    def print(self, plain):
+        """List project information either as plain text or as table."""
+        if plain:
+            print(self.as_plaintext())
 
 
 def backup(args):
@@ -105,7 +115,7 @@ def get_request(resource: str, query: str) -> request.Request:
 
 
 def get_projects() -> list[Project]:
-    the_request = get_request(Project.resource, "fields=id,name,shortName")
+    the_request = get_request(Project.get_list, "fields=id,name,shortName")
     opened_url = request.urlopen(the_request)
     if opened_url.getcode() == 200:
         data = opened_url.read()
