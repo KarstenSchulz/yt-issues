@@ -2,6 +2,8 @@ import os
 
 import pytest
 
+from ytissues.ytlib import Project
+
 
 @pytest.fixture(autouse=True)
 def set_environment():
@@ -104,3 +106,32 @@ class MockedResponseEmptyProjectList:
     @staticmethod
     def getcode():
         return 200
+
+
+@pytest.fixture
+def list_0_projects():
+    return []
+
+
+@pytest.fixture
+def list_empty_str_projects():
+    return [""]
+
+
+@pytest.fixture
+def list_1_projects():
+    return [Project("0-1", "FIRST", "First Project")]
+
+
+@pytest.fixture
+def list_5_projects():
+    projects = []
+    for init_data in [
+        ("0-1", "FIRST", "First Project"),
+        ("0-2", "SECOND", "Second Project"),
+        ("0-3", "THIRD", "Third Project"),
+        ("0-4", "FORCE", "Yedi Project"),
+        ("0-5", "SITH", "Evil Project"),
+    ]:
+        projects.append(Project(*init_data))
+    return projects
