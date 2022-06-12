@@ -35,11 +35,7 @@ class Project:
         return self.displayname
 
     def __eq__(self, other):
-        return (
-            (self.project_id == other.project_id)
-            and (self.shortname == other.shortname)
-            and (self.name == other.name)
-        )
+        return self.project_id == other.project_id
 
     def as_plaintext(self) -> str:
         """Return one line for ls command."""
