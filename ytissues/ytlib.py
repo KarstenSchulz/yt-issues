@@ -137,13 +137,16 @@ def get_projects(project_id: str = None) -> list[Project]:
                     )
                 )
         else:
-            projects = [
-                Project(
-                    project_id=json_data["id"],
-                    shortname=json_data["shortName"],
-                    name=json_data["name"],
-                )
-            ]
+            try:
+                projects = [
+                    Project(
+                        project_id=json_data["id"],
+                        shortname=json_data["shortName"],
+                        name=json_data["name"],
+                    )
+                ]
+            except KeyError:  # we got no project
+                projects = []
         return projects
     else:
         print("Error receiving data", opened_url.getcode())

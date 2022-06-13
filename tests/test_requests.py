@@ -4,7 +4,11 @@ from urllib import request
 
 import pytest
 
-from tests.conftest import MockedResponseEmptyProjectList, MockResponseWithProjects
+from tests.conftest import (
+    MockedResponseError,
+    MockResponseListOf5Projects,
+    MockResponseOneProject,
+)
 from ytissues.ytlib import get_projects, get_request
 
 
@@ -33,32 +37,27 @@ class TestGetProjects:
         the_request = get_request("/resource", "query")
         assert the_request.full_url == f"{yt_url}/resource?query"
 
-    def test_get_projects(self, monkeypatch):
+    def test_get_full_projects_list_len_is_correct(self, monkeypatch):
         def mock_urlopen(*args, **kwargs):
-            return MockResponseWithProjects()
+            return MockResponseListOf5Projects()
 
         monkeypatch.setattr(request, "urlopen", mock_urlopen)
         projects = get_projects()
-        assert projects[0].project_id == "0-16"
-        assert projects[0].shortname == "BD"
-        assert projects[0].name == "bd"
-        assert projects[1].project_id == "0-6"
-        assert projects[1].shortname == "COM"
-        assert projects[1].name == "com"
+        assert len(projects) == 5
 
-    def test_get_projects_list_len_is_correct(self, monkeypatch):
+    def test_get_one_project_succeeds(self, monkeypatch):
         def mock_urlopen(*args, **kwargs):
-            return MockResponseWithProjects()
+            return MockResponseOneProject()
 
         monkeypatch.setattr(request, "urlopen", mock_urlopen)
-        projects = get_projects()
-        assert len(projects) == 12
-
-    def test_get_empty_project_list_succeeds(self, monkeypatch):
-        def mock_urlopen(*args, **kwargs):
-            return MockedResponseEmptyProjectList()
-
-        monkeypatch.setattr(request, "urlopen", mock_urlopen)
-        projects = get_projects()
+        projects = get_projects(project_id="0-1")
         assert isinstance(projects, list)
-        assert len(projects) == 0
+        assert len(projects) == 1
+
+    def test_wrong_project_gets_error(self, monkeypatch):
+        def mock_urlopen(*args, **kwargs):
+            return MockedResponseError()
+
+        monkeypatch.setattr(request, "urlopen", mock_urlopen)
+        projects = get_projects(project_id="NOT_EXISTENT")
+        assert projects == []

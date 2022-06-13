@@ -1,8 +1,85 @@
+import json
 import os
 
 import pytest
 
 from ytissues.ytlib import Project
+
+
+class MockResponse:
+
+    PROJECT = """
+          {
+            "shortName": "FIRST",
+            "name": "First Project",
+            "id": "0-1",
+            "$type": "Project"
+          }
+        """
+
+    PROJECT_LIST = """
+        [
+          {
+            "shortName": "FIRST",
+            "name": "First Project",
+            "id": "0-1",
+            "$type": "Project"
+          },
+          {
+            "shortName": "SECOND",
+            "name": "Second Project",
+            "id": "0-2",
+            "$type": "Project"
+          },
+          {
+            "shortName": "THIRD",
+            "name": "Third Project",
+            "id": "0-3",
+            "$type": "Project"
+          },
+          {
+            "shortName": "FOURTH",
+            "name": "Fourth Project",
+            "id": "0-4",
+            "$type": "Project"
+          },
+          {
+            "shortName": "FIFTH",
+            "name": "Fifth Project",
+            "id": "0-5",
+            "$type": "Project"
+          }
+        ]
+    """
+
+    ERROR_MESSAGE = """
+        {
+          "error": "Not Found",
+          "error_description": "Entity with id {project_id} not found"
+        }
+        """
+
+    @staticmethod
+    def getcode():
+        return 200
+
+
+class MockResponseListOf5Projects(MockResponse):
+    @staticmethod
+    def read() -> str:
+        return MockResponse.PROJECT_LIST
+
+
+class MockResponseOneProject(MockResponse):
+    @staticmethod
+    def read() -> str:
+        return MockResponse.PROJECT
+
+
+class MockedResponseError(MockResponse):
+    @staticmethod
+    def read() -> str:
+        return MockResponse.ERROR_MESSAGE
 
 
 @pytest.fixture(autouse=True)
@@ -11,127 +88,14 @@ def set_environment():
     os.environ["YT_AUTH"] = "perm:not-a-valid-authorization"
 
 
-class MockResponseWithProjects:
-    project_list_api = """
-    [
-  {
-    "shortName": "BD",
-    "name": "bd",
-    "id": "0-16",
-    "$type": "Project"
-  },
-  {
-    "shortName": "COM",
-    "name": "com",
-    "id": "0-6",
-    "$type": "Project"
-  },
-  {
-    "shortName": "CPP",
-    "name": "cpp",
-    "id": "0-9",
-    "$type": "Project"
-  },
-  {
-    "shortName": "DENTA",
-    "name": "denta",
-    "id": "0-11",
-    "$type": "Project"
-  },
-  {
-    "shortName": "DSHELP",
-    "name": "dshelp",
-    "id": "0-2",
-    "$type": "Project"
-  },
-  {
-    "shortName": "DTG",
-    "name": "dtg",
-    "id": "0-12",
-    "$type": "Project"
-  },
-  {
-    "shortName": "EHRUK",
-    "name": "ehruk",
-    "id": "0-14",
-    "$type": "Project"
-  },
-  {
-    "shortName": "GAMBIT",
-    "name": "gambit",
-    "id": "0-18",
-    "$type": "Project"
-  },
-  {
-    "shortName": "HASE",
-    "name": "hase",
-    "id": "0-10",
-    "$type": "Project"
-  },
-  {
-    "shortName": "PFEFFER",
-    "name": "pfeffer",
-    "id": "0-13",
-    "$type": "Project"
-  },
-  {
-    "shortName": "KS",
-    "name": "ks",
-    "id": "0-3",
-    "$type": "Project"
-  },
-  {
-    "shortName": "NORTH",
-    "name": "north",
-    "id": "0-15",
-    "$type": "Project"
-  }
-]
-"""
-
-    @staticmethod
-    def read():
-        return MockResponseWithProjects.project_list_api
-
-    @staticmethod
-    def getcode():
-        return 200
-
-
-class MockedResponseEmptyProjectList:
-    @staticmethod
-    def read():
-        return "[]"
-
-    @staticmethod
-    def getcode():
-        return 200
-
-
-@pytest.fixture
-def list_0_projects():
-    return []
-
-
-@pytest.fixture
-def list_empty_str_projects():
-    return [""]
-
-
-@pytest.fixture
-def list_1_projects():
-    return [Project("0-1", "FIRST", "First Project")]
-
-
 @pytest.fixture
 def list_5_projects():
     projects = []
-    for init_data in [
-        ("0-1", "FIRST", "First Project"),
-        ("0-2", "SECOND", "Second Project"),
-        ("0-3", "THIRD", "Third Project"),
-        ("0-4", "FORCE", "Yedi Project"),
-        ("0-5", "SITH", "Evil Project"),
-    ]:
-        projects.append(Project(*init_data))
+    json_data = json.loads(MockResponse.PROJECT_LIST)
+    for data in json_data:
+        projects.append(
+            Project(
+                project_id=data["id"], shortname=data["shortName"], name=data["name"]
+            )
+        )
     return projects
