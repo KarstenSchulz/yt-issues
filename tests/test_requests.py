@@ -6,6 +6,7 @@ import pytest
 
 from tests.conftest import (
     MockedResponseError,
+    MockedResponseServerError,
     MockResponseListOf5Projects,
     MockResponseOneProject,
 )
@@ -61,3 +62,27 @@ class TestGetProjects:
         monkeypatch.setattr(request, "urlopen", mock_urlopen)
         projects = get_projects(project_id="NOT_EXISTENT")
         assert projects == []
+
+    def test_server_error_raises(self, monkeypatch):
+        def mock_urlopen(*args, **kwargs):
+            return MockedResponseServerError()
+
+        monkeypatch.setattr(request, "urlopen", mock_urlopen)
+        with pytest.raises(IOError):
+            _ = get_projects(project_id="raises Server Error")
+
+    def test_get_request_request_is_well_formed(self):
+        with pytest.raises(ValueError):
+            _ = get_request("please_no_trailing_slash/", "")
+        with pytest.raises(ValueError):
+            _ = get_request("please_start_with_slash", "")
+        with pytest.raises(ValueError):
+            _ = get_request("/please_do_not_start_query_with_?", "?_is_wrong")
+
+    def test_get_request_combines_query(self):
+        r = get_request("/path", "the_query")
+        assert r.full_url == f"{os.environ['YT_URL']}/path?the_query"
+
+    def test_get_request_works_with_empty_query(self):
+        r = get_request("/path", "")
+        assert r.full_url == f"{os.environ['YT_URL']}/path"

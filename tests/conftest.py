@@ -82,6 +82,12 @@ class MockedResponseError(MockResponse):
         return MockResponse.ERROR_MESSAGE
 
 
+class MockedResponseServerError(MockResponse):
+    @staticmethod
+    def getcode():
+        return 500
+
+
 @pytest.fixture(autouse=True)
 def set_environment():
     os.environ["YT_URL"] = "https://not.a.valid.host/to_test/youtrack"
