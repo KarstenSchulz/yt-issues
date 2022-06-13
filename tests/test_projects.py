@@ -3,7 +3,7 @@ Test Project and Issues classes
 """
 import pytest
 
-from ytissues.ytlib import Project, print_as_list, print_as_table
+from ytissues.ytlib import Project, print_as_list
 
 
 class TestProject:
@@ -54,7 +54,7 @@ class TestProject:
 
     def test_project_print(self, capfd):
         p1 = Project("0-1")
-        p1.print(plain=True)
+        p1.print()
         out, err = capfd.readouterr()
         assert out == "0-1 None None\n"
 
@@ -63,15 +63,6 @@ class TestProject:
         out, err = capfd.readouterr()
         for i in range(0, 5):
             assert list_5_projects[i].displayname in out
-        assert err == ""
-
-    def test_print_as_table(self, list_5_projects, capfd):
-        print_as_table(list_5_projects)
-        out, err = capfd.readouterr()
-        for i in range(0, 5):
-            assert list_5_projects[i].project_id in out
-            assert list_5_projects[i].shortname in out
-            assert list_5_projects[i].name in out
         assert err == ""
 
     @pytest.mark.parametrize("init, result", data_displaynames)
