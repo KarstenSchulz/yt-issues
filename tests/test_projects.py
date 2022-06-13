@@ -3,10 +3,10 @@ Test Project and Issues classes
 """
 import pytest
 
-from ytissues.ytlib import Project, list_projects, print_as_list, print_as_table
+from ytissues.ytlib import Issue, Project, print_as_list, print_as_table, print_projects
 
 
-class TestProject:
+class TestProjectDisplaynames:
     data_displaynames = [
         (
             {"project_id": "P_ID", "shortname": "", "name": ""},
@@ -26,6 +26,18 @@ class TestProject:
         ),
     ]
 
+    @pytest.mark.parametrize("init, result", data_displaynames)
+    def test_displayname_text(self, init, result):
+        p = Project(**init)
+        assert p.displayname == result["name"]
+
+    @pytest.mark.parametrize("init, result", data_displaynames)
+    def test_as_plaintext(self, init, result):
+        p = Project(**init)
+        assert p.as_plaintext() == result["plaintext"]
+
+
+class TestProject:
     def test_plain_text(self):
         p = Project("P_ID")
         assert p.as_plaintext() == "P_ID None None"
@@ -73,25 +85,27 @@ class TestProject:
         assert err == ""
 
     def test_list_projects_as_list(self, list_5_projects, capfd):
-        list_projects(list_5_projects)
+        print_projects(list_5_projects)
         out, err = capfd.readouterr()
         for i in range(0, 5):
             assert list_5_projects[i].displayname in out
         assert err == ""
 
     def test_list_projects_as_table(self, list_5_projects, capfd):
-        list_projects(list_5_projects, as_table=True)
+        print_projects(list_5_projects, as_table=True)
         out, err = capfd.readouterr()
         for i in range(0, 5):
             assert list_5_projects[i].displayname in out
         assert err == ""
 
-    @pytest.mark.parametrize("init, result", data_displaynames)
-    def test_displayname_text(self, init, result):
-        p = Project(**init)
-        assert p.displayname == result["name"]
 
-    @pytest.mark.parametrize("init, result", data_displaynames)
-    def test_as_plaintext(self, init, result):
-        p = Project(**init)
-        assert p.as_plaintext() == result["plaintext"]
+class TestProjectDetails:
+    @pytest.fixture
+    def project1(self):
+        return Project("0-1", "FIRST", "First Project")
+
+    def test_get_list_of_issues(self, project1):
+        assert isinstance(project1.issues, list)
+
+    def test_type_of_first_issue(self, project1):
+        assert isinstance(project1.issues[0], Issue)
