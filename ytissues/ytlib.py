@@ -46,10 +46,8 @@ class Project:
         """Return one line for ls command."""
         return f"{self.project_id} {self.shortname} {self.name}"
 
-    def print(self, plain):
-        """List project information either as plain text or as table."""
-        if plain:
-            print(self.as_plaintext())
+    def print(self):
+        print(self.as_plaintext())
 
 
 def backup(args):
@@ -77,12 +75,11 @@ def print_as_list(projects: list[Project]):
         print(project.as_plaintext())
 
 
-def list_projects(plain_list: bool):
-    project_list = get_projects()
-    if plain_list:
-        print_as_list(project_list)
+def list_projects(projects: list[Project], as_table: bool = False):
+    if as_table:
+        print_as_table(projects)
     else:
-        print_as_table(project_list)
+        print_as_list(projects)
 
 
 def get_request(resource: str, query: str) -> request.Request:
@@ -109,26 +106,44 @@ def get_request(resource: str, query: str) -> request.Request:
     if query.startswith("?"):
         raise ValueError(f"Query must not start with '?': {query}")
 
-    url = f"{yt_url}{resource}?{query}"
+    if query:
+        url = f"{yt_url}{resource}?{query}"
+    else:
+        url = f"{yt_url}{resource}"
     headers = {"Accept": "application/json", "Authorization": f"Bearer {yt_auth}"}
     return request.Request(url, headers=headers)
 
 
-def get_projects() -> list[Project]:
-    the_request = get_request(Project.get_list, "fields=id,name,shortName")
+def get_projects(project_id: str = None) -> list[Project]:
+    if project_id is None:  # list all Projects
+        the_request = get_request(Project.get_list, "fields=id,name,shortName")
+    else:
+        the_request = get_request(
+            Project.get_item.format(project_id=project_id[0]),
+            "fields=id,name,shortName",
+        )
     opened_url = request.urlopen(the_request)
     if opened_url.getcode() == 200:
         data = opened_url.read()
         json_data = json.loads(data)
-        projects = []
-        for item in json_data:
-            projects.append(
-                Project(
-                    project_id=item["id"],
-                    shortname=item["shortName"],
-                    name=item["name"],
+        if isinstance(json_data, list):
+            projects = []
+            for item in json_data:
+                projects.append(
+                    Project(
+                        project_id=item["id"],
+                        shortname=item["shortName"],
+                        name=item["name"],
+                    )
                 )
-            )
+        else:
+            projects = [
+                Project(
+                    project_id=json_data["id"],
+                    shortname=json_data["shortName"],
+                    name=json_data["name"],
+                )
+            ]
         return projects
     else:
         print("Error receiving data", opened_url.getcode())
@@ -137,11 +152,8 @@ def get_projects() -> list[Project]:
 
 def ls(args):
     """List all or print a concrete project on stdout."""
-    if args.project_id is None:
-        list_projects(args.plain)
-    else:  # list a concrete project
-        project = Project(args.project_id)
-        project.print(plain=args.plain)
+    projects = get_projects(args.project_id)
+    list_projects(projects, as_table=args.table)
 
 
 def main():
@@ -174,10 +186,10 @@ def main():
         "list all projects with ID, shortname and name.",
     )
     ls_parser.add_argument(
-        "-p",
-        "--plain",
+        "-t",
+        "--table",
         action="store_true",
-        help="Print project information as plain lines to stdout (not as a table).",
+        help="Print project information in a table to stdout (not as a list).",
     )
     ls_parser.add_argument(
         "-i",
