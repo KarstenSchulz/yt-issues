@@ -8,6 +8,7 @@ import argparse
 import json
 import os
 import sys
+from datetime import datetime
 from urllib import request
 
 from rich import box
@@ -37,6 +38,12 @@ class Project:
             self.displayname = project_id
         self._issues = None
 
+    @property
+    def issues(self):
+        if self._issues is None:
+            self._issues = Issue.load(self.project_id)
+        return self._issues
+
     def __str__(self) -> str:
         return self.displayname
 
@@ -49,6 +56,70 @@ class Project:
 
     def print(self):
         print(self.as_plaintext())
+
+
+class Issue:
+    """Represent an Issue in YouTrack.
+
+    When instantiated, it loads the missing values from the YT service.
+    """
+
+    get_list: str = "/api/{project_id}issues"
+    get_item: str = "/api/issues/{issue_id}"
+    get_attachments: str = "/api/issues/{issue_id}/attachments"
+    get_comments: str = "/api/issues/{issue_id}/comments"
+
+    fields = (
+        "fields=id,project,idReadable,created,updated"
+        ",resolved,summary,description,usesMarkdown"
+    )
+
+    created: datetime
+    updated: datetime
+    resolved: datetime
+    summary: str
+    description: str
+    uses_markdown: bool
+    count_comments: int = 0
+    count_attachments: int = 0
+
+    def __init__(self, issue_id: str, project_id: str, id_readable: str = None):
+        self.issue_id = issue_id
+        self.project_id = project_id
+        self.id_readable = id_readable
+
+    @staticmethod
+    def load(project_id: str) -> list:
+        the_request = get_request(
+            Issue.get_list.format(project_id=project_id), f"fields={Issue.fields}"
+        )
+        opened_url = request.urlopen(the_request)
+        if opened_url.getcode() == 200:
+            data = opened_url.read()
+            json_data = json.loads(data)
+            if isinstance(json_data, list):
+                issues = []
+                for item in json_data:
+                    issues.append(
+                        Issue(
+                            issue_id=item["id"],
+                            project_id=project_id,
+                            id_readable=item["idReadable"],
+                        )
+                    )
+            else:
+                try:
+                    issues = [
+                        Issue(
+                            issue_id=json_data["id"],
+                            project_id=project_id,
+                        )
+                    ]
+                except KeyError:  # we got no project
+                    issues = []
+            return issues
+        else:
+            raise IOError(f"Error {opened_url.getcode()} receiving data")
 
 
 def backup(args):
@@ -76,7 +147,7 @@ def print_as_list(projects: list[Project]):
         print(project.as_plaintext())
 
 
-def list_projects(projects: list[Project], as_table: bool = False):
+def print_projects(projects: list[Project], as_table: bool = False):
     if as_table:
         print_as_table(projects)
     else:
@@ -154,10 +225,22 @@ def get_projects(project_id: str = None) -> list[Project]:
         raise IOError(f"Error {opened_url.getcode()} receiving data")
 
 
+def print_project_details(project_id: str):
+    ...
+    projects = get_projects(project_id=project_id)
+    if len(projects) != 1:
+        raise ValueError(f"Projekt mit id {project_id} nicht gefunden!")
+    project = projects[0]
+    print(project)
+
+
 def ls(args):
     """List all or print a concrete project on stdout."""
-    projects = get_projects(args.project_id)
-    list_projects(projects, as_table=args.table)
+    if args.project_id is None:
+        projects = get_projects(args.project_id)
+        print_projects(projects, as_table=args.table)
+    else:  # list on project with issues and number of comments and attachments
+        print_project_details(args.project_id)
 
 
 def parse_arguments(args):
@@ -199,7 +282,8 @@ def parse_arguments(args):
         "-i",
         "--project_id",
         metavar="PROJECT_ID",
-        help="List the given PROJECT_ID.",
+        help="List the given PROJECT_ID with issues and number of commtents "
+        "and attachments.",
     )
     ls_parser.set_defaults(func=ls)
     return parser.parse_args(args)
@@ -207,5 +291,4 @@ def parse_arguments(args):
 
 def main():
     args = parse_arguments(sys.argv[1:])
-    print(args)
     args.func(args)

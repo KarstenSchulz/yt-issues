@@ -1,8 +1,11 @@
 """
 Test Project and Issues classes
 """
+from urllib import request
+
 import pytest
 
+from tests.test_issues import MockIssueList
 from ytissues.ytlib import Issue, Project, print_as_list, print_as_table, print_projects
 
 
@@ -104,8 +107,16 @@ class TestProjectDetails:
     def project1(self):
         return Project("0-1", "FIRST", "First Project")
 
-    def test_get_list_of_issues(self, project1):
+    def test_get_list_of_issues(self, project1, monkeypatch):
+        def mock_urlopen(*args, **kwargs):
+            return MockIssueList()
+
+        monkeypatch.setattr(request, "urlopen", mock_urlopen)
         assert isinstance(project1.issues, list)
 
-    def test_type_of_first_issue(self, project1):
+    def test_type_of_first_issue(self, project1, monkeypatch):
+        def mock_urlopen(*args, **kwargs):
+            return MockIssueList()
+
+        monkeypatch.setattr(request, "urlopen", mock_urlopen)
         assert isinstance(project1.issues[0], Issue)
