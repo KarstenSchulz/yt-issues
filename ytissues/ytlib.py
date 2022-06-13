@@ -7,6 +7,7 @@ Get data from https://www.jetbrains.com/help/youtrack/devportal/youtrack-rest-ap
 import argparse
 import json
 import os
+import sys
 from urllib import request
 
 from rich import box
@@ -95,11 +96,12 @@ def get_request(resource: str, query: str) -> request.Request:
     Raises:
         KeyError, if environment variables YT_URL or YT_AUTH are missing.
         ValueError, if some of the data is malformed.
+        IOError, if server connection returns error
     """
     # check some data:
     yt_url = os.environ["YT_URL"]
     yt_auth = os.environ["YT_AUTH"]
-    if yt_url.endswith("/"):
+    if resource.endswith("/"):
         raise ValueError(f"YT_URL must not end with '/': {yt_url}")
     if not resource.startswith("/"):
         raise ValueError(f"Resource must start with '/': {resource}")
@@ -119,7 +121,7 @@ def get_projects(project_id: str = None) -> list[Project]:
         the_request = get_request(Project.get_list, "fields=id,name,shortName")
     else:
         the_request = get_request(
-            Project.get_item.format(project_id=project_id[0]),
+            Project.get_item.format(project_id=project_id),
             "fields=id,name,shortName",
         )
     opened_url = request.urlopen(the_request)
@@ -149,8 +151,7 @@ def get_projects(project_id: str = None) -> list[Project]:
                 projects = []
         return projects
     else:
-        print("Error receiving data", opened_url.getcode())
-        return []
+        raise IOError(f"Error {opened_url.getcode()} receiving data")
 
 
 def ls(args):
@@ -159,7 +160,7 @@ def ls(args):
     list_projects(projects, as_table=args.table)
 
 
-def main():
+def parse_arguments(args):
     parser = argparse.ArgumentParser()
     subparsers = parser.add_subparsers(
         description="Use the following commands to retrieve project names or issues "
@@ -171,12 +172,12 @@ def main():
         "backup", help="Backup all issues of all project with all attachments."
     )
     backup_parser.add_argument(
-        "backup-dir",
+        "backup_dir",
         metavar="YT_BACKUP_DIR",
         help="The root directory to store all tickets.",
     )
     backup_parser.add_argument(
-        "-p",
+        "-i",
         "--project-id",
         metavar="PROJECT_ID",
         help="Project ID to backup (eg '0-42'). If ommited, all projects are saved.",
@@ -198,9 +199,13 @@ def main():
         "-i",
         "--project_id",
         metavar="PROJECT_ID",
-        nargs="*",
-        help="List issues of the given PROJECT_IDs.",
+        help="List the given PROJECT_ID.",
     )
     ls_parser.set_defaults(func=ls)
-    args = parser.parse_args()
+    return parser.parse_args(args)
+
+
+def main():
+    args = parse_arguments(sys.argv[1:])
+    print(args)
     args.func(args)
