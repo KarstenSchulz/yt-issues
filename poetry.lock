@@ -83,9 +83,12 @@ test = ["flake8 (==3.7.8)", "hypothesis (==3.55.3)"]
 name = "coverage"
 version = "6.4.1"
 description = "Code coverage measurement for Python"
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=3.7"
+
+[package.dependencies]
+tomli = {version = "*", optional = true, markers = "python_full_version <= \"3.11.0a6\" and extra == \"toml\""}
 
 [package.extras]
 toml = ["tomli"]
@@ -371,7 +374,7 @@ testing = ["coverage (>=4)", "coverage-enable-subprocess (>=1)", "flaky (>=3)", 
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.10"
-content-hash = "7c0008188b1eaa032dc378082f0ca6dd11bde86133cf05487cb93333eeb5f904"
+content-hash = "2c7c31510bcb687ae37c77257f9d547ea5c4fba540ad5b0682d79318285305bb"
 
 [metadata.files]
 atomicwrites = [

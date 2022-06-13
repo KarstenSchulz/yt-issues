@@ -8,7 +8,6 @@ license = "MIT"
 [tool.poetry.dependencies]
 python = "^3.10"
 rich = "^12.2.0"
-coverage = "^6.4.1"
 
 [tool.poetry.dev-dependencies]
 black = "^22.1.0"
@@ -16,13 +15,18 @@ flake8 = "^4.0.1"
 pre-commit = "^2.17.0"
 isort = "^5.10.1"
 pytest = "^7.1.2"
-coverage = "^6.4.1"
+coverage = {extras = ["toml"], version = "^6.4.1"}
 
 [tool.poetry.scripts]
 yt = 'ytissues.ytlib:main'
 
 [tool.isort]
 profile = "black"
+
+[tool.coverage.run]
+branch = true
+source = ["ytissues"]
+
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
