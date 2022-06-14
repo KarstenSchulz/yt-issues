@@ -1,4 +1,5 @@
 """Test Issue class."""
+from datetime import datetime
 from urllib import request
 
 import pytest
@@ -32,6 +33,21 @@ class MockIssueResponse:
         ]
     """
 
+    time_stamps = {
+        "FIRST-1": {
+            "created": datetime(2021, 11, 22, 14, 21, 22, 538000),
+            "updated": datetime(2022, 6, 1, 10, 17, 51, 241000),
+        },
+        "FIRST-2": {
+            "created": datetime(2021, 11, 15, 19, 18, 2, 583000),
+            "updated": datetime(2022, 6, 1, 10, 34, 31, 241000),
+        },
+        "FIRST-3": {
+            "created": datetime(2021, 11, 21, 3, 0),
+            "updated": datetime(2021, 11, 27, 6, 13, 20),
+        },
+    }
+
     ISSUE_LIST = """
     [
       {
@@ -51,11 +67,11 @@ class MockIssueResponse:
         "$type": "Issue"
       },
       {
-        "created": 1637587282538,
+        "created": 1637000282583,
         "description": "Some explanations of the second issue.",
         "idReadable": "FIRST-2",
         "summary": "The title of the second issue",
-        "updated": 1654071471241,
+        "updated": 1654072471241,
         "project": {
             "shortName": "FIRST",
             "id": "0-1",
@@ -67,11 +83,11 @@ class MockIssueResponse:
         "$type": "Issue"
       },
       {
-        "created": 1637587282538,
+        "created": 1637460000000,
         "description": "Some explanations of the third issue.",
         "idReadable": "FIRST-3",
         "summary": "The title of the third issue",
-        "updated": 1654071471241,
+        "updated": 1637990000000,
         "project": {
             "shortName": "FIRST",
             "id": "0-1",
