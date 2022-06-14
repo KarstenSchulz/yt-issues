@@ -13,6 +13,7 @@ from urllib import request
 
 from rich import box
 from rich.console import Console
+from rich.progress import track
 from rich.table import Table
 
 
@@ -50,9 +51,12 @@ class Project:
     def __eq__(self, other):
         return self.project_id == other.project_id
 
-    def as_plaintext(self) -> str:
+    def as_plaintext(self, verbose=False) -> str:
         """Return one line for ls command."""
-        return f"{self.project_id} {self.shortname} {self.name}"
+        line = f"{self.project_id} {self.shortname} {self.name}"
+        if verbose:
+            line += f" {len(self.issues)} issues"
+        return line
 
     def print(self):
         print(self.as_plaintext())
@@ -64,15 +68,12 @@ class Issue:
     When instantiated, it loads the missing values from the YT service.
     """
 
-    get_list: str = "/api/{project_id}issues"
+    get_list: str = "/api/admin/projects/{project_id}/issues"
     get_item: str = "/api/issues/{issue_id}"
     get_attachments: str = "/api/issues/{issue_id}/attachments"
     get_comments: str = "/api/issues/{issue_id}/comments"
 
-    fields = (
-        "fields=id,idReadable,created,updated,resolved,summary,description,"
-        "commentsCount"
-    )
+    fields = "id,idReadable,created,updated,resolved,summary,description,commentsCount"
 
     def __init__(
         self,
@@ -149,7 +150,7 @@ def backup(args):
     raise NotImplementedError
 
 
-def print_as_table(projects: list[Project]):
+def print_as_table(projects: list[Project], verbose):
     table = Table(
         title="List of projects",
         caption=f"{len(projects)} projects in total",
@@ -158,22 +159,35 @@ def print_as_table(projects: list[Project]):
     table.add_column("ID", justify="right", no_wrap=True)
     table.add_column("Short Name", no_wrap=True)
     table.add_column("Name", no_wrap=True)
-    for project in projects:
-        table.add_row(project.project_id, project.shortname, project.name)
+    if verbose:
+        table.add_column("Issues", no_wrap=True)
+
+    for project in track(projects, description="Getting info..."):
+        if verbose:
+            table.add_row(
+                project.project_id,
+                project.shortname,
+                project.name,
+                str(len(project.issues)),
+            )
+        else:
+            table.add_row(project.project_id, project.shortname, project.name)
     console = Console()
     console.print(table)
 
 
-def print_as_list(projects: list[Project]):
+def print_as_list(projects: list[Project], verbose):
     for project in projects:
-        print(project.as_plaintext())
+        print(project.as_plaintext(verbose))
 
 
-def print_projects(projects: list[Project], as_table: bool = False):
+def print_projects(
+    projects: list[Project], as_table: bool = False, verbose: bool = False
+):
     if as_table:
-        print_as_table(projects)
+        print_as_table(projects, verbose)
     else:
-        print_as_list(projects)
+        print_as_list(projects, verbose)
 
 
 def get_request(resource: str, query: str) -> request.Request:
@@ -260,7 +274,7 @@ def ls(args):
     """List all or print a concrete project on stdout."""
     if args.project_id is None:
         projects = get_projects(args.project_id)
-        print_projects(projects, as_table=args.table)
+        print_projects(projects, as_table=args.table, verbose=args.verbose)
     else:  # list on project with issues and number of comments and attachments
         print_project_details(args.project_id)
 
@@ -304,8 +318,10 @@ def parse_arguments(args):
         "-i",
         "--project_id",
         metavar="PROJECT_ID",
-        help="List the given PROJECT_ID with issues and number of commtents "
-        "and attachments.",
+        help="List the given PROJECT_ID with issues and number of comments.",
+    )
+    ls_parser.add_argument(
+        "-v", "--verbose", action="store_true", help="Display more information."
     )
     ls_parser.set_defaults(func=ls)
     return parser.parse_args(args)
