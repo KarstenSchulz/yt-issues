@@ -118,8 +118,10 @@ class Project:
 
         """
 
-        backup_path = trim_pathname(backup_pathname)
+        # main backup dir:
+        backup_path = Path(trim_pathname(backup_pathname))
         backup_path.mkdir(parents=True, exist_ok=True)
+        # the backup dir for one project:
         project_path = backup_path / trim_pathname(self.displayname)
         project_path.mkdir(parents=True, exist_ok=True)
         print(project_path)
@@ -161,6 +163,13 @@ class Issue:
         self.description = description
         self.summary = summary
         self.comments_count = comments_count
+        self._comments = None
+
+    @property
+    def comments(self):
+        if self._comments is None:
+            self._comments = IssueComment.load(self.issue_id)
+        return self._comments
 
     def backup(self, backup_path):
         """Save issue Data to backup_path.
@@ -168,9 +177,35 @@ class Issue:
         Args:
             backup_path: the pathlib.Path to the backup directory.
         """
-        filename = f"{self.id_readable} - {self.summary}.md"
+        filename = trim_filename(f"{self.id_readable} - {self.summary}.md")
         filepath = backup_path / Path(filename)
-        filepath.write_text("# " + self.summary + "\n" + self.description)
+        if self.resolved:
+            resolved_text = f"Resolved: {self.resolved.strftime('%y-%m-%d %H:%M')}.\n\n"
+        else:
+            resolved_text = "Resolved: No.\n\n"
+        filepath.write_text(
+            "# "
+            + self.summary
+            + "\n"
+            + f"Created: {self.created.strftime('%y-%m-%d %H:%M')}, "
+            + f"Updated: {self.updated.strftime('%y-%m-%d %H:%M')}, "
+            + resolved_text
+            + self.description
+            + "\n\n"
+            + self.all_comments_as_text()
+            + "\n"
+        )
+
+    def all_comments_as_text(self) -> str:
+        """List all comments to save them into the backup file.
+
+        Returns:
+            A (possibly big) string with all comments of the issue.
+        """
+        comments = ""
+        for comment in self.comments:
+            comments += comment.as_text()
+        return comments
 
     @staticmethod
     def load(project_id: str) -> list:
@@ -218,6 +253,31 @@ class Issue:
             return issues
         else:
             raise IOError(f"Error {opened_url.getcode()} receiving data")
+
+
+class IssueComment:
+    """Represent a Comment in an Issue in YouTrack.
+
+    When instantiated, it loads the missing values from the YT service.
+    """
+
+    get_list: str = "api/issues/{issue_id}/comments"
+    get_item: str = "/api/issues/{issue_id}/comments/{commentID}"
+    get_attachments: str = "/api/issues/{issue_id}/attachments"
+    get_comments: str = "/api/issues/{issue_id}/comments"
+
+    fields = "id,idReadable,created,updated,resolved,summary,description,commentsCount"
+
+    def __init__(
+        self,
+        comment_id: str,
+        project_id: str,
+        author: str = None,
+        created: datetime = None,
+        updated: datetime = None,
+        text: str = None,
+    ):
+        raise NotImplementedError
 
 
 def print_as_table(projects: list[Project], verbose):
@@ -411,33 +471,34 @@ def parse_arguments(args):
     return parser.parse_args(args)
 
 
-def trim_pathname(pathname: str) -> Path:
+def trim_pathname(pathname: str) -> str:
     """Replace critical chars in `pathname`.
 
-    Repaces chars with space and squeezes spaces to one space.
+    Repaces critical chars with space and squeezes spaces to one space.
 
     Args:
          pathname: A relative or absolute pathname to backup the project.
      Returns:
-         A pathlib.Path object with the cleaned pathname
+         A string with the cleaned pathname
     """
     cleaned_pathname = re.sub(r"[:\\><]", " ", pathname)
-    return Path(re.sub(" {2,}", " ", cleaned_pathname))
+    return re.sub(" {2,}", " ", cleaned_pathname)
 
 
-def trim_filename(filename: str) -> Path:
-    """Replace critical chars in `pathname`.
+def trim_filename(filename: str) -> str:
+    """Replace critical chars in `filename`.
 
     Repaces chars with space and squeezes spaces to one space.
 
     Args:
-         pathname: A relative or absolute pathname to backup the project.
+         filename: A filename to use to write to the filesystem. Can be the summary
+            of an issue.
      Returns:
-         A pathlib.Path object with the cleaned pathname
+         A string with the cleaned filename (eg. removed slash ('/')
     """
-    cleaned_filename = str(trim_pathname(filename))
-    cleaned_filename = re.sub(r"[/]", " ", cleaned_filename)
-    return Path(re.sub(" {2,}", " ", cleaned_filename))
+    cleaned_filename = trim_pathname(filename)
+    cleaned_filename = cleaned_filename.replace("/", " ")
+    return re.sub(" {2,}", " ", cleaned_filename)
 
 
 def main():
