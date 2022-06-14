@@ -61,18 +61,28 @@ class Project:
     def print(self):
         print(self.as_plaintext())
 
-    def print_details(self, as_table):
+    def print_details(self, as_table, verbose):
         """Print Project with issues."""
 
         def get_issue_data() -> list[str]:
-            return [
-                issue.issue_id,
-                issue.created.strftime("%y-%m-%d %H:%M"),
-                issue.updated.strftime("%y-%m-%d %H:%M"),
-                "Yes" if issue.resolved else "No",
-                issue.summary,
-                str(issue.comments_count),
-            ]
+            if verbose:
+                return [
+                    issue.issue_id,
+                    issue.id_readable,
+                    issue.created.strftime("%y-%m-%d %H:%M"),
+                    issue.updated.strftime("%y-%m-%d %H:%M"),
+                    "Yes" if issue.resolved else "No",
+                    issue.summary,
+                    str(issue.comments_count),
+                ]
+            else:
+                return [
+                    issue.issue_id,
+                    issue.created.strftime("%y-%m-%d %H:%M"),
+                    issue.updated.strftime("%y-%m-%d %H:%M"),
+                    "Yes" if issue.resolved else "No",
+                    issue.summary,
+                ]
 
         if as_table:
             table = Table(
@@ -80,12 +90,16 @@ class Project:
                 caption=f"{len(self.issues)} issues in total",
                 box=box.ROUNDED,
             )
-            table.add_column("Issue ID", justify="right", no_wrap=True)
+            table.add_column("ID", justify="right", no_wrap=True)
+            if verbose:
+                table.add_column("Issue-ID", justify="right", no_wrap=True)
+
             table.add_column("Created", justify="center", no_wrap=True)
             table.add_column("Last Update", justify="center", no_wrap=True)
             table.add_column("Resolved", justify="center", no_wrap=True)
             table.add_column("Summary", no_wrap=False)
-            table.add_column("Comments", no_wrap=True)
+            if verbose:
+                table.add_column("Comments", no_wrap=True)
             for issue in self.issues:
                 table.add_row(*get_issue_data())
             console = Console()
@@ -224,6 +238,15 @@ def print_projects(
         print_as_list(projects, verbose)
 
 
+def print_project_details(project_id: str, as_table: bool, verbose: bool):
+    ...
+    projects = get_projects(project_id=project_id)
+    if len(projects) != 1:
+        raise ValueError(f"Projekt mit id {project_id} nicht gefunden!")
+    project = projects[0]
+    project.print_details(as_table, verbose)
+
+
 def get_request(resource: str, query: str) -> request.Request:
     """Return a Request object for the YT service.
 
@@ -295,22 +318,13 @@ def get_projects(project_id: str = None) -> list[Project]:
         raise IOError(f"Error {opened_url.getcode()} receiving data")
 
 
-def print_project_details(project_id: str, as_table: bool):
-    ...
-    projects = get_projects(project_id=project_id)
-    if len(projects) != 1:
-        raise ValueError(f"Projekt mit id {project_id} nicht gefunden!")
-    project = projects[0]
-    project.print_details(as_table)
-
-
 def ls(args):
     """List all or print a concrete project on stdout."""
     if args.project_id is None:
         projects = get_projects(args.project_id)
         print_projects(projects, as_table=args.table, verbose=args.verbose)
     else:  # list on project with issues and number of comments and attachments
-        print_project_details(args.project_id, args.table)
+        print_project_details(args.project_id, args.table, args.verbose)
 
 
 def parse_arguments(args):
