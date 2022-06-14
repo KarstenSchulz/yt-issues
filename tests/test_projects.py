@@ -120,3 +120,10 @@ class TestProjectDetails:
 
         monkeypatch.setattr(request, "urlopen", mock_urlopen)
         assert isinstance(project1.issues[0], Issue)
+
+    def test_loads_list_of_issues(self, project1, monkeypatch):
+        def mock_urlopen(*args, **kwargs):
+            return MockIssueList()
+
+        monkeypatch.setattr(request, "urlopen", mock_urlopen)
+        assert len(project1.issues) == 3
