@@ -1,5 +1,7 @@
 """Test User API (command line interface)."""
-from ytissues.ytlib import parse_arguments
+from pathlib import Path
+
+from ytissues.ytlib import parse_arguments, trim
 
 
 def test_backup_command_respects_project_id():
@@ -30,3 +32,18 @@ def test_ls_lists_one_project_as_table():
     args = parse_arguments(["ls", "-t", "-i", "0-1"])
     assert args.project_id == "0-1"
     assert args.table is True
+
+
+def test_trim_function():
+    for source, converted in [
+        ("ABCabc", "ABCabc"),
+        ("ABC   abc", "ABC abc"),
+        ("A:B", "A B"),
+        ("A/B", "A B"),
+        ("A>B", "A B"),
+        ("A<B", "A B"),
+        ("A\\B", "A B"),
+        ("A:/?>>B", "A ? B"),
+        ("A_/_B", "A_ _B"),
+    ]:
+        assert trim(source) == Path(converted)

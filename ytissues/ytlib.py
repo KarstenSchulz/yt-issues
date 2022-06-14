@@ -7,8 +7,10 @@ Get data from https://www.jetbrains.com/help/youtrack/devportal/youtrack-rest-ap
 import argparse
 import json
 import os
+import re
 import sys
 from datetime import datetime
+from pathlib import Path
 from urllib import request
 
 from rich import box
@@ -108,6 +110,17 @@ class Project:
             print("Issue ID;Created;Last Update;Resolved;Summary;Comments")
             for issue in self.issues:
                 print(";".join(get_issue_data()))
+
+    def backup(self, backup_pathname: str):
+        """Write all Project data to files in the directory 'backup_pathname'.
+
+        Raises:
+
+        """
+
+        backup_path = trim(backup_pathname)
+        backup_path.mkdir(parents=True, exist_ok=True)
+        raise NotImplementedError
 
 
 class Issue:
@@ -373,6 +386,20 @@ def parse_arguments(args):
     )
     ls_parser.set_defaults(func=ls)
     return parser.parse_args(args)
+
+
+def trim(pathname: str) -> Path:
+    """Replace critical chars in `pathname`.
+
+    Repaces chars with space and squeezes spaces to one space.
+
+    Args:
+         pathname: A relative or absolute pathname to backup the project.
+     Returns:
+         A pathlib.Path object with the cleaned pathname
+    """
+    cleaned_pathname = re.sub(r"[:/\\><]", " ", pathname)
+    return Path(re.sub(" {2,}", " ", cleaned_pathname))
 
 
 def main():
