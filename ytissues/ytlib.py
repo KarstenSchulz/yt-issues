@@ -70,23 +70,31 @@ class Issue:
     get_comments: str = "/api/issues/{issue_id}/comments"
 
     fields = (
-        "fields=id,project,idReadable,created,updated"
-        ",resolved,summary,description,usesMarkdown"
+        "fields=id,idReadable,created,updated,resolved,summary,description,"
+        "commentsCount"
     )
 
-    created: datetime
-    updated: datetime
-    resolved: datetime
-    summary: str
-    description: str
-    uses_markdown: bool
-    count_comments: int = 0
-    count_attachments: int = 0
-
-    def __init__(self, issue_id: str, project_id: str, id_readable: str = None):
+    def __init__(
+        self,
+        issue_id: str,
+        project_id: str,
+        id_readable: str = None,
+        created: datetime = None,
+        updated: datetime = None,
+        resolved: datetime = None,
+        description: str = None,
+        summary: str = None,
+        comments_count=0,
+    ):
         self.issue_id = issue_id
         self.project_id = project_id
         self.id_readable = id_readable
+        self.created = created
+        self.updated = updated
+        self.resolved = resolved
+        self.description = description
+        self.summary = summary
+        self.comments_count = comments_count
 
     @staticmethod
     def load(project_id: str) -> list:
@@ -100,11 +108,25 @@ class Issue:
             if isinstance(json_data, list):
                 issues = []
                 for item in json_data:
+                    created, updated, resolved = None, None, None
+                    if item["created"] is not None:
+                        created = datetime.fromtimestamp(item["created"] / 1000)
+                    if item["updated"] is not None:
+                        updated = datetime.fromtimestamp(item["updated"] / 1000)
+                    if item["resolved"] is not None:
+                        resolved = datetime.fromtimestamp(item["resolved"] / 1000)
+
                     issues.append(
                         Issue(
                             issue_id=item["id"],
                             project_id=project_id,
                             id_readable=item["idReadable"],
+                            created=created,
+                            updated=updated,
+                            resolved=resolved,
+                            description=item["description"],
+                            summary=item["summary"],
+                            comments_count=item["commentsCount"],
                         )
                     )
             else:

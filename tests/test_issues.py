@@ -13,7 +13,6 @@ def project_0_1() -> Project:
 
 
 class MockIssueResponse:
-
     EMPTY_ISSUELIST = """[]"""
 
     ISSUE_ID_LIST = """
@@ -37,14 +36,17 @@ class MockIssueResponse:
         "FIRST-1": {
             "created": datetime(2021, 11, 22, 14, 21, 22, 538000),
             "updated": datetime(2022, 6, 1, 10, 17, 51, 241000),
+            "resolved": None,
         },
         "FIRST-2": {
             "created": datetime(2021, 11, 15, 19, 18, 2, 583000),
             "updated": datetime(2022, 6, 1, 10, 34, 31, 241000),
+            "resolved": None,
         },
         "FIRST-3": {
             "created": datetime(2021, 11, 21, 3, 0),
             "updated": datetime(2021, 11, 27, 6, 13, 20),
+            "resolved": datetime(2021, 11, 27, 6, 13, 20),
         },
     }
 
@@ -56,14 +58,9 @@ class MockIssueResponse:
         "idReadable": "FIRST-1",
         "summary": "The title of the first issue",
         "updated": 1654071471241,
-        "project": {
-            "shortName": "FIRST",
-            "id": "0-1",
-            "$type": "Project"
-        },
         "resolved": null,
-        "usesMarkdown": true,
         "id": "2-1",
+        "commentsCount": 0,
         "$type": "Issue"
       },
       {
@@ -72,14 +69,9 @@ class MockIssueResponse:
         "idReadable": "FIRST-2",
         "summary": "The title of the second issue",
         "updated": 1654072471241,
-        "project": {
-            "shortName": "FIRST",
-            "id": "0-1",
-            "$type": "Project"
-        },
         "resolved": null,
-        "usesMarkdown": true,
         "id": "2-2",
+        "commentsCount": 1,
         "$type": "Issue"
       },
       {
@@ -88,14 +80,9 @@ class MockIssueResponse:
         "idReadable": "FIRST-3",
         "summary": "The title of the third issue",
         "updated": 1637990000000,
-        "project": {
-            "shortName": "FIRST",
-            "id": "0-1",
-            "$type": "Project"
-        },
-        "resolved": null,
-        "usesMarkdown": true,
+        "resolved": 1637990000000,
         "id": "2-3",
+        "commentsCount": 42,
         "$type": "Issue"
       }
     ]
@@ -172,7 +159,35 @@ class TestIssueStructure:
             return MockIssueList()
 
         monkeypatch.setattr(request, "urlopen", mock_urlopen)
-        issue = project_0_1.issues[0]
-        assert issue.issue_id == "2-1"
-        assert issue.id_readable == "FIRST-1"
-        assert issue.project_id == "0-1"
+        for number, issue in enumerate(project_0_1.issues, start=1):
+            assert issue.issue_id == f"2-{number}"
+            assert issue.id_readable == f"FIRST-{number}"
+            assert issue.project_id == "0-1"
+
+    def test_has_timestamps(self, monkeypatch, project_0_1):
+        def mock_urlopen(*args, **kwargs):
+            return MockIssueList()
+
+        monkeypatch.setattr(request, "urlopen", mock_urlopen)
+        tstamp = MockIssueResponse.time_stamps
+        for issue in project_0_1.issues:
+            assert issue.created == tstamp[issue.id_readable]["created"]
+            assert issue.updated == tstamp[issue.id_readable]["updated"]
+            assert issue.resolved == tstamp[issue.id_readable]["resolved"]
+
+    def test_has_summary_and_description(self, monkeypatch, project_0_1):
+        def mock_urlopen(*args, **kwargs):
+            return MockIssueList()
+
+        monkeypatch.setattr(request, "urlopen", mock_urlopen)
+        for number, issue in zip(("first", "second", "third"), project_0_1.issues):
+            assert issue.description == f"Some explanations of the {number} issue."
+            assert issue.summary == f"The title of the {number} issue"
+
+    def test_has_comments_count(self, monkeypatch, project_0_1):
+        def mock_urlopen(*args, **kwargs):
+            return MockIssueList()
+
+        monkeypatch.setattr(request, "urlopen", mock_urlopen)
+        for number, issue in zip((0, 1, 42), project_0_1.issues):
+            assert issue.comments_count == number
