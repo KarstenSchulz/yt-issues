@@ -74,14 +74,14 @@ class TestProject:
         assert out == "0-1 None None\n"
 
     def test_print_as_list(self, list_5_projects, capfd):
-        print_as_list(list_5_projects)
+        print_as_list(list_5_projects, verbose=False)
         out, err = capfd.readouterr()
         for i in range(0, 5):
             assert list_5_projects[i].displayname in out
         assert err == ""
 
     def test_print_as_table(self, list_5_projects, capfd):
-        print_as_table(list_5_projects)
+        print_as_table(list_5_projects, verbose=False)
         out, err = capfd.readouterr()
         for i in range(0, 5):
             assert list_5_projects[i].displayname in out
