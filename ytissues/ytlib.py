@@ -118,9 +118,13 @@ class Project:
 
         """
 
-        backup_path = trim(backup_pathname)
+        backup_path = trim_pathname(backup_pathname)
         backup_path.mkdir(parents=True, exist_ok=True)
-        raise NotImplementedError
+        project_path = backup_path / trim_pathname(self.displayname)
+        project_path.mkdir(parents=True, exist_ok=True)
+        print(project_path)
+        for issue in self.issues:
+            issue.backup(project_path)
 
 
 class Issue:
@@ -157,6 +161,16 @@ class Issue:
         self.description = description
         self.summary = summary
         self.comments_count = comments_count
+
+    def backup(self, backup_path):
+        """Save issue Data to backup_path.
+
+        Args:
+            backup_path: the pathlib.Path to the backup directory.
+        """
+        filename = f"{self.id_readable} - {self.summary}.md"
+        filepath = backup_path / Path(filename)
+        filepath.write_text("# " + self.summary + "\n" + self.description)
 
     @staticmethod
     def load(project_id: str) -> list:
@@ -206,11 +220,6 @@ class Issue:
             raise IOError(f"Error {opened_url.getcode()} receiving data")
 
 
-def backup(args):
-    """Implements ls sub-command and lists project names or issues"""
-    raise NotImplementedError
-
-
 def print_as_table(projects: list[Project], verbose):
     table = Table(
         title="List of projects",
@@ -253,10 +262,7 @@ def print_projects(
 
 def print_project_details(project_id: str, as_table: bool, verbose: bool):
     ...
-    projects = get_projects(project_id=project_id)
-    if len(projects) != 1:
-        raise ValueError(f"Projekt mit id {project_id} nicht gefunden!")
-    project = projects[0]
+    project = get_project(project_id)
     project.print_details(as_table, verbose)
 
 
@@ -291,6 +297,13 @@ def get_request(resource: str, query: str) -> request.Request:
         url = f"{yt_url}{resource}"
     headers = {"Accept": "application/json", "Authorization": f"Bearer {yt_auth}"}
     return request.Request(url, headers=headers)
+
+
+def get_project(project_id: str) -> Project:
+    projects = get_projects(project_id)
+    if len(projects) != 1:
+        raise ValueError(f"Projekt mit id {project_id} nicht gefunden!")
+    return projects[0]
 
 
 def get_projects(project_id: str = None) -> list[Project]:
@@ -329,6 +342,16 @@ def get_projects(project_id: str = None) -> list[Project]:
         return projects
     else:
         raise IOError(f"Error {opened_url.getcode()} receiving data")
+
+
+def backup(args):
+    """Implements backup of one Project (-i project_id) or all."""
+    print(args)
+    if args.project_id:
+        project = get_project(args.project_id)
+        project.backup(args.backup_dir)
+    else:
+        raise NotImplementedError("No complete backup atm.")
 
 
 def ls(args):
@@ -377,7 +400,7 @@ def parse_arguments(args):
     )
     ls_parser.add_argument(
         "-i",
-        "--project_id",
+        "--project-id",
         metavar="PROJECT_ID",
         help="List the given PROJECT_ID with issues and number of comments.",
     )
@@ -388,7 +411,7 @@ def parse_arguments(args):
     return parser.parse_args(args)
 
 
-def trim(pathname: str) -> Path:
+def trim_pathname(pathname: str) -> Path:
     """Replace critical chars in `pathname`.
 
     Repaces chars with space and squeezes spaces to one space.
@@ -398,8 +421,23 @@ def trim(pathname: str) -> Path:
      Returns:
          A pathlib.Path object with the cleaned pathname
     """
-    cleaned_pathname = re.sub(r"[:/\\><]", " ", pathname)
+    cleaned_pathname = re.sub(r"[:\\><]", " ", pathname)
     return Path(re.sub(" {2,}", " ", cleaned_pathname))
+
+
+def trim_filename(filename: str) -> Path:
+    """Replace critical chars in `pathname`.
+
+    Repaces chars with space and squeezes spaces to one space.
+
+    Args:
+         pathname: A relative or absolute pathname to backup the project.
+     Returns:
+         A pathlib.Path object with the cleaned pathname
+    """
+    cleaned_filename = str(trim_pathname(filename))
+    cleaned_filename = re.sub(r"[/]", " ", cleaned_filename)
+    return Path(re.sub(" {2,}", " ", cleaned_filename))
 
 
 def main():
