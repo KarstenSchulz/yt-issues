@@ -1,5 +1,4 @@
 """Test User API (command line interface)."""
-from pathlib import Path
 
 from ytissues.ytlib import parse_arguments, trim_filename, trim_pathname
 
@@ -46,7 +45,7 @@ def test_trim_filename_function():
         ("A:/?>>B", "A ? B"),
         ("A_/_B", "A_ _B"),
     ]:
-        assert trim_filename(source) == Path(converted)
+        assert trim_filename(source) == converted
 
 
 def test_trim_pathname_function():
@@ -55,4 +54,4 @@ def test_trim_pathname_function():
         ("A:/?>>B", "A /? B"),
         ("A_/_B", "A_/_B"),
     ]:
-        assert trim_pathname(source) == Path(converted)
+        assert trim_pathname(source) == converted
