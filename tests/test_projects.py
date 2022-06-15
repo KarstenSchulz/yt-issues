@@ -39,6 +39,11 @@ class TestProjectDisplaynames:
         p = Project(**init)
         assert p.as_plaintext() == result["plaintext"]
 
+    def test_verbose_as_plaintext(self, monkeypatch):
+        monkeypatch.setattr(Project, "issues", ["issue1", "issue2"])
+        p = Project(project_id="P_ID")
+        assert p.as_plaintext(verbose=True) == "P_ID None None 2 issues"
+
 
 class TestProject:
     def test_plain_text(self):
