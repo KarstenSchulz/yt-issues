@@ -90,6 +90,16 @@ class TestProject:
         out, err = capfd.readouterr()
         for i in range(0, 5):
             assert list_5_projects[i].displayname in out
+            assert "Issues" not in out
+        assert err == ""
+
+    def test_print_as_table_verbose(self, list_5_projects, monkeypatch, capfd):
+        monkeypatch.setattr(Project, "issues", ["issue1", "issue2"])
+        print_as_table(list_5_projects, verbose=True)
+        out, err = capfd.readouterr()
+        for i in range(0, 5):
+            assert list_5_projects[i].displayname in out
+            assert "Issues" in out
         assert err == ""
 
     def test_list_projects_as_list(self, list_5_projects, capfd):
