@@ -477,7 +477,8 @@ def backup(args):
         project = get_project(args.project_id)
         project.backup(args.backup_dir)
     else:
-        raise NotImplementedError("No complete backup atm.")
+        for project in get_projects():
+            project.backup(args.backup_dir)
 
 
 def ls(args):
