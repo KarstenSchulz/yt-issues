@@ -411,7 +411,6 @@ def get_request(resource: str, query: str) -> request.Request:
         ValueError, if some of the data is malformed.
         IOError, if server connection returns error
     """
-    # check some data:
     yt_url = os.environ["YT_URL"]
     yt_auth = os.environ["YT_AUTH"]
     # check the data:
@@ -421,11 +420,10 @@ def get_request(resource: str, query: str) -> request.Request:
         raise ValueError(f"Resource must start with '/': {resource}")
     if query.startswith("?"):
         raise ValueError(f"Query must not start with '?': {query}")
+    if query and not query.startswith("fields="):
+        raise ValueError(f"Query must start with 'fields=': {query}")
 
-    if query:
-        url = f"{yt_url}{resource}?{query}"
-    else:
-        url = f"{yt_url}{resource}"
+    url = f"{yt_url}{resource}?{query}" if query else f"{yt_url}{resource}"
     headers = {"Accept": "application/json", "Authorization": f"Bearer {yt_auth}"}
     return request.Request(url, headers=headers)
 

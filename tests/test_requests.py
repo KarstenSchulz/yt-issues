@@ -35,8 +35,8 @@ class TestGetProjects:
             get_request("/resource", "?query")
 
     def test_get_request_correct_url(self, yt_url, yt_auth):
-        the_request = get_request("/resource", "query")
-        assert the_request.full_url == f"{yt_url}/resource?query"
+        the_request = get_request("/resource", "fields=test")
+        assert the_request.full_url == f"{yt_url}/resource?fields=test"
 
     def test_get_full_projects_list_len_is_correct(self, monkeypatch):
         def mock_urlopen(*args, **kwargs):
@@ -80,8 +80,8 @@ class TestGetProjects:
             _ = get_request("/please_do_not_start_query_with_?", "?_is_wrong")
 
     def test_get_request_combines_query(self):
-        r = get_request("/path", "the_query")
-        assert r.full_url == f"{os.environ['YT_URL']}/path?the_query"
+        r = get_request("/path", "fields=the_query")
+        assert r.full_url == f"{os.environ['YT_URL']}/path?fields=the_query"
 
     def test_get_request_works_with_empty_query(self):
         r = get_request("/path", "")
