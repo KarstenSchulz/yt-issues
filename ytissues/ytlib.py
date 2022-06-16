@@ -122,7 +122,6 @@ class Project:
         # the backup dir for one project:
         project_path = backup_path / trim_pathname(self.displayname)
         project_path.mkdir(parents=True, exist_ok=True)
-        print(project_path)
         for issue in self.issues:
             issue.backup(project_path)
 
@@ -474,7 +473,6 @@ def get_projects(project_id: str = None) -> list[Project]:
 
 def backup(args):
     """Implements backup of one Project (-i project_id) or all."""
-    print(args)
     if args.project_id:
         project = get_project(args.project_id)
         project.backup(args.backup_dir)
