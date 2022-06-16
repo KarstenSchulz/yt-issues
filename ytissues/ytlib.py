@@ -565,8 +565,7 @@ def trim_filename(filename: str) -> str:
      Returns:
          A string with the cleaned filename (eg. removed slash ('/')
     """
-    cleaned_filename = trim_pathname(filename)
-    cleaned_filename = cleaned_filename.replace("/", " ")
+    cleaned_filename = re.sub(r"[/:\\><]", " ", filename)
     return re.sub(" {2,}", " ", cleaned_filename)
 
 
