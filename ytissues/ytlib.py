@@ -61,9 +61,6 @@ class Project:
             line += f" {len(self.issues)} issues"
         return line
 
-    def print(self):
-        print(self.as_plaintext())
-
     def print_details(self, as_table, verbose):
         """Print Project with issues."""
 

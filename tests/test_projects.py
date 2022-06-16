@@ -74,7 +74,7 @@ class TestProject:
 
     def test_project_print(self, capfd):
         p1 = Project("0-1")
-        p1.print()
+        print(p1.as_plaintext())
         out, err = capfd.readouterr()
         assert out == "0-1 None None\n"
 
