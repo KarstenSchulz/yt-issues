@@ -34,13 +34,13 @@ class Project:
         self.project_id = project_id or None
         self.shortname = shortname or None
         self.name = name or None
-        if shortname:
-            self.displayname = shortname
-        elif name:
-            self.displayname = name
-        else:
-            self.displayname = project_id
         self._issues = None
+
+    @property
+    def displayname(self) -> str:
+        if self.shortname:
+            return self.shortname
+        return self.name if self.name else self.project_id
 
     @property
     def issues(self):
