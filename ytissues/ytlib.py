@@ -27,8 +27,8 @@ class Project:
 
     """
 
-    get_list: str = "/api/admin/projects"
-    get_item: str = "/api/admin/projects/{project_id}"
+    get_list: str = "/youtrack/api/admin/projects"
+    get_item: str = "/youtrack/api/admin/projects/{project_id}"
 
     def __init__(self, project_id: str, shortname: str = None, name: str = None):
         self.project_id = project_id or None
@@ -132,10 +132,10 @@ class Issue:
     When instantiated, it loads the missing values from the YT service.
     """
 
-    get_list: str = "/api/admin/projects/{project_id}/issues"
-    get_item: str = "/api/issues/{issue_id}"
-    get_comments: str = "/api/issues/{issue_id}/comments"
-    get_attachments: str = "/api/issues/{issue_id}/attachments"
+    get_list: str = "/youtrack/api/admin/projects/{project_id}/issues"
+    get_item: str = "/youtrack/api/issues/{issue_id}"
+    get_comments: str = "/youtrack/api/issues/{issue_id}/comments"
+    get_attachments: str = "/youtrack/api/issues/{issue_id}/attachments"
 
     fields = "id,idReadable,created,updated,resolved,summary,description,commentsCount"
 
@@ -158,17 +158,73 @@ class Issue:
         self.updated = updated
         self.resolved = resolved
         self.description = description
-        self.summary = trim_filename(
-            f"{self.created.strftime('%Y-%m-%d')} " f"{self.id_readable} - {summary}"
-        )
+        self.summary = self.create_summary(summary)
         self.comments_count = comments_count
         self._comments = None
+        self._attachments = None
+
+    def create_summary(self, summary) -> str:
+        if self.created and self.id_readable and summary:
+            return trim_filename(
+                f"{self.created.strftime('%Y-%m-%d')} "
+                f"{self.id_readable} - {summary}"
+            )
+        else:
+            return summary
 
     @property
     def comments(self):
         if self._comments is None:
             self._comments = IssueComment.load(self.issue_id)
         return self._comments
+
+    @property
+    def attachments(self):
+        if self._attachments is None:
+            self._attachments = self.load_attachments()
+        return self._attachments
+
+    def load_attachments(self) -> list:
+        the_request = get_request(
+            IssueAttachment.get_list.format(issue_id=self.issue_id),
+            f"fields={IssueAttachment.fields}",
+        )
+        opened_url = request.urlopen(the_request)
+        if opened_url.getcode() == 200:
+            data = opened_url.read()
+            json_data = json.loads(data)
+            if isinstance(json_data, list):
+                issue_attachments = []
+                for item in json_data:
+                    issue_attachments.append(
+                        IssueAttachment(
+                            issue_id=self.issue_id,
+                            name=item["name"],
+                            size=item["size"],
+                            mimetype=item["mimeType"],
+                            extension=item["extension"],
+                            charset=item["charset"],
+                            url=item["url"],
+                        )
+                    )
+            else:
+                try:
+                    issue_attachments = [
+                        IssueAttachment(
+                            issue_id=self.issue_id,
+                            name=json_data["name"],
+                            size=json_data["size"],
+                            mimetype=json_data["mimeType"],
+                            extension=json_data["extension"],
+                            charset=json_data["charset"],
+                            url=json_data["url"],
+                        )
+                    ]
+                except KeyError:
+                    issue_attachments = []
+            return issue_attachments
+        else:
+            raise IOError(f"Error {opened_url.getcode()} receiving data")
 
     def backup(self, backup_path):
         """Save issue Data to backup_path.
@@ -187,10 +243,29 @@ class Issue:
             f"Created: {self.created.strftime('%Y-%m-%d %H:%M')}\n"
             f"Updated: {self.updated.strftime('%Y-%m-%d %H:%M')}\n"
             f"{resolved_text}\n"
-            f"{self.description}\n\n"
+            f"{self.description}\n"
         )
+        issue_text += self.attachment_list()
+        issue_text += "\n\n"
         issue_text += textwrap.dedent(f"""{self.all_comments_as_text()}""")
         filepath.write_text(issue_text)
+        if len(self.attachments) > 0:
+            yt_url = os.environ["YT_URL"]
+            attachment_dir = backup_path / f"{self.summary}_attachments"
+            attachment_dir.mkdir(exist_ok=True)
+            for attachment in self.attachments:
+                save_file = attachment_dir / attachment.name
+                opened_url = request.urlopen(yt_url + attachment.url)
+                save_file.write_bytes(opened_url.read())
+
+    def attachment_list(self) -> str:
+        """Return a markdown-list of attachment names or emptry string."""
+        attachment_list = ""
+        if len(self.attachments) > 0:
+            attachment_list += f"There are {len(self.attachments)} attachments:\n"
+            for item in self.attachments:
+                attachment_list += f"* {item.name}\n"
+        return attachment_list
 
     def all_comments_as_text(self) -> str:
         """List all comments to save them into the backup file.
@@ -251,14 +326,30 @@ class Issue:
             raise IOError(f"Error {opened_url.getcode()} receiving data")
 
 
+class IssueAttachment:
+    """Represents an Attachment to the issue (Name and link, not the data!)."""
+
+    get_list = "/youtrack/api/issues/{issue_id}/attachments"
+    fields = "name,size,mimeType,extension,charset,url"
+
+    def __init__(self, issue_id, name, size, mimetype, extension, charset, url):
+        self.issue_id = issue_id
+        self.name = name
+        self.size = size
+        self.mimetype = mimetype
+        self.extension = extension
+        self.charset = charset
+        self.url = url
+
+
 class IssueComment:
     """Represent a Comment in an Issue in YouTrack.
 
     When instantiated, it loads the missing values from the YT service.
     """
 
-    get_list: str = "/api/issues/{issue_id}/comments"
-    get_item: str = "/api/issues/{issue_id}/comments/{commentID}"
+    get_list: str = "/youtrack/api/issues/{issue_id}/comments"
+    get_item: str = "/youtrack/api/issues/{issue_id}/comments/{commentID}"
 
     fields = "id,text,created,updated,author(name),attachments(id,name)"
 
@@ -398,7 +489,7 @@ def get_request(resource: str, query: str) -> request.Request:
     """Return a Request object for the YT service.
 
     Args:
-        resource: The api resource, for example `/api/admin/projects`
+        resource: The api resource, for example `/youtrack/api/admin/projects`
         query: The GET query string, for example `?fields=id,name,shortName'
 
     Returns:
