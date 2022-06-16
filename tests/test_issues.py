@@ -182,7 +182,7 @@ class TestIssueStructure:
         monkeypatch.setattr(request, "urlopen", mock_urlopen)
         for number, issue in zip(("first", "second", "third"), project_0_1.issues):
             assert issue.description == f"Some explanations of the {number} issue."
-            assert issue.summary == f"The title of the {number} issue"
+            assert issue.summary.endswith(f"The title of the {number} issue")
 
     def test_has_comments_count(self, monkeypatch, project_0_1):
         def mock_urlopen(*args, **kwargs):
