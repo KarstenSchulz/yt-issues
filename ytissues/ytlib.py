@@ -9,6 +9,7 @@ import json
 import os
 import re
 import sys
+import textwrap
 from datetime import datetime
 from pathlib import Path
 from urllib import request
@@ -183,18 +184,18 @@ class Issue:
             resolved_text = f"Resolved: {self.resolved.strftime('%y-%m-%d %H:%M')}.\n\n"
         else:
             resolved_text = "Resolved: No.\n\n"
-        filepath.write_text(
-            "# "
-            + self.summary
-            + "\n"
-            + f"Created: {self.created.strftime('%y-%m-%d %H:%M')}, "
-            + f"Updated: {self.updated.strftime('%y-%m-%d %H:%M')}, "
-            + resolved_text
-            + self.description
-            + "\n\n"
-            + self.all_comments_as_text()
-            + "\n"
+        issue_text = textwrap.dedent(
+            f"""
+            # {self.summary}
+            Created: {self.created.strftime('%y-%m-%d %H:%M')}
+            Updated: {self.updated.strftime('%y-%m-%d %H:%M')}
+            {resolved_text}
+            {self.description}
+            ***
+            {self.all_comments_as_text()}
+        """
         )
+        filepath.write_text(issue_text)
 
     def all_comments_as_text(self) -> str:
         """List all comments to save them into the backup file.
@@ -261,7 +262,7 @@ class IssueComment:
     When instantiated, it loads the missing values from the YT service.
     """
 
-    get_list: str = "api/issues/{issue_id}/comments"
+    get_list: str = "/api/issues/{issue_id}/comments"
     get_item: str = "/api/issues/{issue_id}/comments/{commentID}"
 
     fields = "id,text,created,updated,author(name),attachments(id,name)"
@@ -269,14 +270,12 @@ class IssueComment:
     def __init__(
         self,
         comment_id: str,
-        project_id: str,
         author: str = None,
         created: datetime = None,
         updated: datetime = None,
         text: str = None,
     ):
         self.comment_id = comment_id
-        self.project_id = project_id
         self.author = author
         self.created = created
         self.updated = updated
@@ -289,10 +288,69 @@ class IssueComment:
 
     def __str__(self):
         infoline = f"[Author: {self.author}, "
-        infoline += f"created: {self.created.strftime('%Y-%m-%d %H:%M')}]"
-        infoline += f"updated: {self.updated.strftime('%Y-%m-%d %H:%M')}]"
+        if self.created:
+            infoline += f"created: {self.created.strftime('%Y-%m-%d %H:%M')}]"
+        else:
+            infoline += "created: -]"
+        if self.updated:
+            infoline += f"updated: {self.updated.strftime('%Y-%m-%d %H:%M')}]"
+        else:
+            infoline += "updated: -]"
         infoline += "\n\n"
         return infoline + self.text
+
+    def as_text(self) -> str:
+        return self.__str__()
+
+    @staticmethod
+    def load(issue_id: str) -> list:
+        the_request = get_request(
+            IssueComment.get_list.format(issue_id=issue_id),
+            f"fields={IssueComment.fields}",
+        )
+        opened_url = request.urlopen(the_request)
+        if opened_url.getcode() == 200:
+            data = opened_url.read()
+            json_data = json.loads(data)
+            if isinstance(json_data, list):
+                issue_comments = []
+                for item in json_data:
+                    created, updated = None, None
+                    if item["created"] is not None:
+                        created = datetime.fromtimestamp(item["created"] / 1000)
+                    if item["updated"] is not None:
+                        updated = datetime.fromtimestamp(item["updated"] / 1000)
+
+                    issue_comments.append(
+                        IssueComment(
+                            comment_id=item["id"],
+                            author=item["author"],
+                            created=created,
+                            updated=updated,
+                            text=item["text"],
+                        )
+                    )
+            else:
+                try:
+                    created, updated = None, None
+                    if json_data["created"] is not None:
+                        created = datetime.fromtimestamp(json_data["created"] / 1000)
+                    if json_data["updated"] is not None:
+                        updated = datetime.fromtimestamp(json_data["updated"] / 1000)
+                    issue_comments = [
+                        IssueComment(
+                            comment_id=json_data["id"],
+                            author=json_data["author"],
+                            created=created,
+                            updated=updated,
+                            text=json_data["text"],
+                        )
+                    ]
+                except KeyError:  # we got no project
+                    issue_comments = []
+            return issue_comments
+        else:
+            raise IOError(f"Error {opened_url.getcode()} receiving data")
 
 
 def print_as_table(projects: list[Project], verbose):
