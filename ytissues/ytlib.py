@@ -135,8 +135,8 @@ class Issue:
 
     get_list: str = "/api/admin/projects/{project_id}/issues"
     get_item: str = "/api/issues/{issue_id}"
-    get_attachments: str = "/api/issues/{issue_id}/attachments"
     get_comments: str = "/api/issues/{issue_id}/comments"
+    get_attachments: str = "/api/issues/{issue_id}/attachments"
 
     fields = "id,idReadable,created,updated,resolved,summary,description,commentsCount"
 
@@ -301,6 +301,7 @@ class IssueComment:
 
     @staticmethod
     def load(issue_id: str) -> list:
+        """Return list of comments for Issue issue_id."""
         the_request = get_request(
             IssueComment.get_list.format(issue_id=issue_id),
             f"fields={IssueComment.fields}",
@@ -391,7 +392,6 @@ def print_projects(
 
 
 def print_project_details(project_id: str, as_table: bool, verbose: bool):
-    ...
     project = get_project(project_id)
     project.print_details(as_table, verbose)
 
@@ -414,6 +414,7 @@ def get_request(resource: str, query: str) -> request.Request:
     # check some data:
     yt_url = os.environ["YT_URL"]
     yt_auth = os.environ["YT_AUTH"]
+    # check the data:
     if resource.endswith("/"):
         raise ValueError(f"YT_URL must not end with '/': {yt_url}")
     if not resource.startswith("/"):
