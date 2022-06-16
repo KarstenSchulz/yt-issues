@@ -69,8 +69,8 @@ class Project:
                 return [
                     issue.issue_id,
                     issue.id_readable,
-                    issue.created.strftime("%y-%m-%d %H:%M"),
-                    issue.updated.strftime("%y-%m-%d %H:%M"),
+                    issue.created.strftime("%Y-%m-%d %H:%M"),
+                    issue.updated.strftime("%Y-%m-%d %H:%M"),
                     "Yes" if issue.resolved else "No",
                     issue.summary,
                     str(issue.comments_count),
@@ -78,8 +78,8 @@ class Project:
             else:
                 return [
                     issue.issue_id,
-                    issue.created.strftime("%y-%m-%d %H:%M"),
-                    issue.updated.strftime("%y-%m-%d %H:%M"),
+                    issue.created.strftime("%Y-%m-%d %H:%M"),
+                    issue.updated.strftime("%Y-%m-%d %H:%M"),
                     "Yes" if issue.resolved else "No",
                     issue.summary,
                 ]
@@ -159,7 +159,9 @@ class Issue:
         self.updated = updated
         self.resolved = resolved
         self.description = description
-        self.summary = summary
+        self.summary = trim_filename(
+            f"{self.created.strftime('%Y-%m-%d')} " f"{self.id_readable} - {summary}"
+        )
         self.comments_count = comments_count
         self._comments = None
 
@@ -180,18 +182,15 @@ class Issue:
         if self.resolved:
             resolved_text = f"Resolved: {self.resolved.strftime('%y-%m-%d %H:%M')}.\n\n"
         else:
-            resolved_text = "Resolved: No.\n\n"
-        issue_text = textwrap.dedent(
-            f"""
-            # {self.summary}
-            Created: {self.created.strftime('%y-%m-%d %H:%M')}
-            Updated: {self.updated.strftime('%y-%m-%d %H:%M')}
-            {resolved_text}
-            {self.description}
-            ***
-            {self.all_comments_as_text()}
-        """
+            resolved_text = "Resolved: No.\n"
+        issue_text = (
+            f"# {self.summary}\n"
+            f"Created: {self.created.strftime('%Y-%m-%d %H:%M')}\n"
+            f"Updated: {self.updated.strftime('%Y-%m-%d %H:%M')}\n"
+            f"{resolved_text}\n"
+            f"{self.description}\n\n"
         )
+        issue_text += textwrap.dedent(f"""{self.all_comments_as_text()}""")
         filepath.write_text(issue_text)
 
     def all_comments_as_text(self) -> str:
@@ -286,11 +285,11 @@ class IssueComment:
     def __str__(self):
         infoline = f"[Author: {self.author}, "
         if self.created:
-            infoline += f"created: {self.created.strftime('%Y-%m-%d %H:%M')}]"
+            infoline += f"created: {self.created.strftime('%Y-%m-%d %H:%M')}, "
         else:
             infoline += "created: -]"
         if self.updated:
-            infoline += f"updated: {self.updated.strftime('%Y-%m-%d %H:%M')}]"
+            infoline += f"updated: {self.updated.strftime('%Y-%m-%d %H:%M')}. "
         else:
             infoline += "updated: -]"
         infoline += "\n\n"
