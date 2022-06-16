@@ -176,10 +176,10 @@ class Issue:
         Args:
             backup_path: the pathlib.Path to the backup directory.
         """
-        filename = trim_filename(f"{self.id_readable} - {self.summary}.md")
+        filename = self.summary + ".md"
         filepath = backup_path / Path(filename)
         if self.resolved:
-            resolved_text = f"Resolved: {self.resolved.strftime('%y-%m-%d %H:%M')}.\n\n"
+            resolved_text = f"Resolved: {self.resolved.strftime('%Y-%m-%d %H:%M')}.\n"
         else:
             resolved_text = "Resolved: No.\n"
         issue_text = (
@@ -275,23 +275,23 @@ class IssueComment:
         self.created = created
         self.updated = updated
         self.text = text
-        self._attachments = None
+        self._attachment_names = None
 
     @property
-    def attachments(self):
+    def attachment_names(self):
         raise NotImplementedError
 
     def __str__(self):
-        infoline = f"[Author: {self.author}, "
+        infoline = f"\n---\n**Kommentar von {self.author}, "
         if self.created:
             infoline += f"created: {self.created.strftime('%Y-%m-%d %H:%M')}, "
         else:
-            infoline += "created: -]"
+            infoline += "created: -, "
         if self.updated:
             infoline += f"updated: {self.updated.strftime('%Y-%m-%d %H:%M')}. "
         else:
-            infoline += "updated: -]"
-        infoline += "\n\n"
+            infoline += "updated: -."
+        infoline += "**\n\n"
         return infoline + self.text
 
     def as_text(self) -> str:
@@ -320,7 +320,7 @@ class IssueComment:
                     issue_comments.append(
                         IssueComment(
                             comment_id=item["id"],
-                            author=item["author"],
+                            author=item["author"]["name"],
                             created=created,
                             updated=updated,
                             text=item["text"],
