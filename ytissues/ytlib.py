@@ -263,10 +263,8 @@ class IssueComment:
 
     get_list: str = "api/issues/{issue_id}/comments"
     get_item: str = "/api/issues/{issue_id}/comments/{commentID}"
-    get_attachments: str = "/api/issues/{issue_id}/attachments"
-    get_comments: str = "/api/issues/{issue_id}/comments"
 
-    fields = "id,idReadable,created,updated,resolved,summary,description,commentsCount"
+    fields = "id,text,created,updated,author(name),attachments(id,name)"
 
     def __init__(
         self,
@@ -277,7 +275,24 @@ class IssueComment:
         updated: datetime = None,
         text: str = None,
     ):
+        self.comment_id = comment_id
+        self.project_id = project_id
+        self.author = author
+        self.created = created
+        self.updated = updated
+        self.text = text
+        self._attachments = None
+
+    @property
+    def attachments(self):
         raise NotImplementedError
+
+    def __str__(self):
+        infoline = f"[Author: {self.author}, "
+        infoline += f"created: {self.created.strftime('%Y-%m-%d %H:%M')}]"
+        infoline += f"updated: {self.updated.strftime('%Y-%m-%d %H:%M')}]"
+        infoline += "\n\n"
+        return infoline + self.text
 
 
 def print_as_table(projects: list[Project], verbose):
