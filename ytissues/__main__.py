@@ -1,4 +1,4 @@
 """Main entry point."""
-from .ytlib import main
+from .cli import main
 
 main()

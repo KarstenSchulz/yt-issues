@@ -1,6 +1,7 @@
 """Test User API (command line interface)."""
 
-from ytissues.ytlib import parse_arguments, trim_filename, trim_pathname
+from ytissues.cli import parse_arguments
+from ytissues.ytlib import trim_filename, trim_pathname
 
 
 def test_backup_command_respects_project_id():

@@ -4,11 +4,9 @@ Library for retrieving issues from the youtrack service.
 Get data from https://www.jetbrains.com/help/youtrack/devportal/youtrack-rest-api.html
 
 """
-import argparse
 import json
 import os
 import re
-import sys
 import textwrap
 from datetime import datetime
 from pathlib import Path
@@ -18,6 +16,8 @@ from rich import box
 from rich.console import Console
 from rich.progress import track
 from rich.table import Table
+
+import ytissues.cli
 
 
 class Project:
@@ -123,7 +123,7 @@ class Project:
         project_path = backup_path / trim_pathname(self.displayname)
         project_path.mkdir(parents=True, exist_ok=True)
         for issue in self.issues:
-            issue.backup(project_path)
+            ytissues.cli.backup(project_path)
 
 
 class Issue:
@@ -562,73 +562,6 @@ def get_projects(project_id: str = None) -> list[Project]:
         raise IOError(f"Error {opened_url.getcode()} receiving data")
 
 
-def backup(args):
-    """Implements backup of one Project (-i project_id) or all."""
-    if args.project_id:
-        project = get_project(args.project_id)
-        project.backup(args.backup_dir)
-    else:
-        for project in get_projects():
-            project.backup(args.backup_dir)
-
-
-def ls(args):
-    """List all or print a concrete project on stdout."""
-    if args.project_id is None:
-        projects = get_projects(args.project_id)
-        print_projects(projects, as_table=args.table, verbose=args.verbose)
-    else:  # list on project with issues and number of comments and attachments
-        print_project_details(args.project_id, args.table, args.verbose)
-
-
-def parse_arguments(args):
-    parser = argparse.ArgumentParser()
-    subparsers = parser.add_subparsers(
-        description="Use the following commands to retrieve project names or issues "
-        + "from a Youtrack service.",
-        metavar="COMMAND",
-        required=True,
-    )
-    backup_parser = subparsers.add_parser(
-        "backup", help="Backup all issues of all project with all attachments."
-    )
-    backup_parser.add_argument(
-        "backup_dir",
-        metavar="YT_BACKUP_DIR",
-        help="The root directory to store all tickets.",
-    )
-    backup_parser.add_argument(
-        "-i",
-        "--project-id",
-        metavar="PROJECT_ID",
-        help="Project ID to backup (eg '0-42'). If ommited, all projects are saved.",
-    )
-    backup_parser.set_defaults(func=backup)
-    ls_parser = subparsers.add_parser(
-        "ls",
-        help="List all projects as table on stdout.",
-        description="If run without options, "
-        "list all projects with ID, shortname and name.",
-    )
-    ls_parser.add_argument(
-        "-t",
-        "--table",
-        action="store_true",
-        help="Print project information in a table to stdout (not as a list).",
-    )
-    ls_parser.add_argument(
-        "-i",
-        "--project-id",
-        metavar="PROJECT_ID",
-        help="List the given PROJECT_ID with issues and number of comments.",
-    )
-    ls_parser.add_argument(
-        "-v", "--verbose", action="store_true", help="Display more information."
-    )
-    ls_parser.set_defaults(func=ls)
-    return parser.parse_args(args)
-
-
 def trim_pathname(pathname: str) -> str:
     """Replace critical chars in `pathname`.
 
@@ -656,8 +589,3 @@ def trim_filename(filename: str) -> str:
     """
     cleaned_filename = re.sub(r"[/:\\><]", " ", filename)
     return re.sub(" {2,}", " ", cleaned_filename)
-
-
-def main():
-    args = parse_arguments(sys.argv[1:])
-    args.func(args)

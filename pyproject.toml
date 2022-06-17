@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "ytissues"
-version = "0.0.1"
+version = "0.0.2"
 description = ""
 authors = ["Karsten Schulz <github@karstenschulz.biz>"]
 license = "MIT"
@@ -18,7 +18,7 @@ pytest = "^7.1.2"
 coverage = {extras = ["toml"], version = "^6.4.1"}
 
 [tool.poetry.scripts]
-yt = 'ytissues.ytlib:main'
+yt = 'ytissues.cli:main'
 
 [tool.isort]
 profile = "black"
