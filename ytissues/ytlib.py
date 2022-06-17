@@ -131,8 +131,6 @@ class Issue:
 
     get_list: str = "/youtrack/api/admin/projects/{project_id}/issues"
     get_item: str = "/youtrack/api/issues/{issue_id}"
-    get_comments: str = "/youtrack/api/issues/{issue_id}/comments"
-    get_attachments: str = "/youtrack/api/issues/{issue_id}/attachments"
 
     fields = "id,idReadable,created,updated,resolved,summary,description,commentsCount"
 
