@@ -14,10 +14,7 @@ from urllib import request
 
 from rich import box
 from rich.console import Console
-from rich.progress import track
 from rich.table import Table
-
-import ytissues.cli
 
 
 class Project:
@@ -123,7 +120,7 @@ class Project:
         project_path = backup_path / trim_pathname(self.displayname)
         project_path.mkdir(parents=True, exist_ok=True)
         for issue in self.issues:
-            ytissues.cli.backup(project_path)
+            issue.backup(project_path)
 
 
 class Issue:
@@ -438,51 +435,6 @@ class IssueComment:
             return issue_comments
         else:
             raise IOError(f"Error {opened_url.getcode()} receiving data")
-
-
-def print_as_table(projects: list[Project], verbose):
-    table = Table(
-        title="List of projects",
-        caption=f"{len(projects)} projects in total",
-        box=box.ROUNDED,
-    )
-    table.add_column("ID", justify="right", no_wrap=True)
-    table.add_column("Short Name", no_wrap=True)
-    table.add_column("Name", no_wrap=True)
-    if verbose:
-        table.add_column("Issues", no_wrap=True)
-
-    for project in track(projects, description="Getting info..."):
-        if verbose:
-            table.add_row(
-                project.project_id,
-                project.shortname,
-                project.name,
-                str(len(project.issues)),
-            )
-        else:
-            table.add_row(project.project_id, project.shortname, project.name)
-    console = Console()
-    console.print(table)
-
-
-def print_as_list(projects: list[Project], verbose):
-    for project in projects:
-        print(project.as_plaintext(verbose))
-
-
-def print_projects(
-    projects: list[Project], as_table: bool = False, verbose: bool = False
-):
-    if as_table:
-        print_as_table(projects, verbose)
-    else:
-        print_as_list(projects, verbose)
-
-
-def print_project_details(project_id: str, as_table: bool, verbose: bool):
-    project = get_project(project_id)
-    project.print_details(as_table, verbose)
 
 
 def get_request(resource: str, query: str) -> request.Request:

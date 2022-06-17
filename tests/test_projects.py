@@ -6,7 +6,8 @@ from urllib import request
 import pytest
 
 from tests.test_issues import MockIssueList
-from ytissues.ytlib import Issue, Project, print_as_list, print_as_table, print_projects
+from ytissues.cli import print_as_list, print_as_table, print_projects
+from ytissues.ytlib import Issue, Project
 
 
 class TestProjectDisplaynames:
