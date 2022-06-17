@@ -370,7 +370,7 @@ class IssueComment:
         raise NotImplementedError
 
     def __str__(self):
-        infoline = f"\n---\n**Kommentar von {self.author}, "
+        infoline = f"\n---\n**Comment by {self.author}, "
         if self.created:
             infoline += f"created: {self.created.strftime('%Y-%m-%d %H:%M')}, "
         else:
@@ -472,7 +472,7 @@ def get_request(resource: str, query: str) -> request.Request:
 def get_project(project_id: str) -> Project:
     projects = get_projects(project_id)
     if len(projects) != 1:
-        raise ValueError(f"Projekt mit id {project_id} nicht gefunden!")
+        raise ValueError(f"Project with ID '{project_id}' not found!")
     return projects[0]
 
 
