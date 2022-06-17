@@ -15,7 +15,8 @@ def backup(args):
         project = get_project(args.project_id)
         project.backup(args.backup_dir)
     else:
-        for project in get_projects():
+        projects = get_projects()
+        for project in track(projects, description="Downloading projects..."):
             project.backup(args.backup_dir)
 
 
