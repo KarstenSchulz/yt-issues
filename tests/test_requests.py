@@ -13,6 +13,7 @@ from tests.conftest import (
 from ytissues.ytlib import get_projects, get_request
 
 
+# noinspection PyUnusedLocal
 class TestGetProjects:
     def test_test_environment_is_set(self):
         assert os.environ["YT_URL"] == "https://not.a.valid.host/to_test/youtrack"

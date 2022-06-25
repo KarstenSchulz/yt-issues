@@ -118,6 +118,7 @@ class TestProject:
         assert err == ""
 
 
+# noinspection PyUnusedLocal
 class TestProjectDetails:
     @pytest.fixture
     def project1(self):

@@ -112,6 +112,7 @@ class MockIssueError(MockIssueResponse):
         return MockIssueList.ERROR_MESSAGE
 
 
+# noinspection PyUnusedLocal
 class TestIssueStructure:
     def test_issue_init(self):
         assert Issue(issue_id="", project_id="")
