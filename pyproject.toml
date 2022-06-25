@@ -27,6 +27,10 @@ profile = "black"
 branch = true
 source = ["ytissues"]
 
+[tool.pytest.ini_options]
+minversion = "7.1"
+addopts = "--strict-markers -ra"
+xfail_strict = true
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
