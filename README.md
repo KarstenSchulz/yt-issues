@@ -11,19 +11,19 @@ No need for a running server.
 
 For that, text and comments of issues will be slightly reformatted and stored into markdown files.
 Attachments of the issues will be stored accordingly in corresponding folders.
-Markdown links to the attachments are converted, so that they are usable in the local copy.
+It is planned to convert the links to the attachments, so that they are usable in the local copy. Until then, just use your file explorer to view the attachments.
 
-This can be useful for:
+This tool can be useful for:
 - To have a local archive, which is grepable.
 - To have fast access to attachments without waiting for downloads (I live in germany 🙄).
-- To have access to the most important data in case of service failure.
+- To have access to the most important data in case of service failure or outage.
 - To have an offline local copy for outages of the service (planned or unplanned).
 - To have a copy of the data on mobile devices without online access.
 - ...
 
 ## Roadmap
 
-### Version 0.1.0 (MVP, in development)
+### Version 0.1.0 (MVP implemented, tests needed)
 - `yt ls PROJECT [PROJECT ...]` - if no PROJECT given: list all open projects, otherwise list open (or all) issues of PROJECT to stdout (ID, Title, State).
 - `yt backup YT_BACKUP_DIR` - Download all issues with attachments of all project to subdirs in YT_BACKUP_DIR in a readable format, which means markdown files with attachments in their corresponding attachment directories.
 
