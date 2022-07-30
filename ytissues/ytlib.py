@@ -58,7 +58,7 @@ class Project:
             line += f" {len(self.issues)} issues"
         return line
 
-    def print_details(self, as_table, verbose):
+    def print_details(self, as_table: bool, verbose: bool):
         """Print Project with issues."""
 
         def get_issue_data() -> list[str]:
@@ -158,7 +158,8 @@ class Issue:
         self._comments = None
         self._attachments = None
 
-    def create_summary(self, summary) -> str:
+    def create_summary(self, summary: str) -> str:
+        """Make a meaningful summary heading from raw summary."""
         if self.created and self.id_readable and summary:
             return trim_filename(
                 f"{self.created.strftime('%Y-%m-%d')} "
@@ -221,7 +222,7 @@ class Issue:
         else:
             raise IOError(f"Error {opened_url.getcode()} receiving data")
 
-    def backup(self, backup_path):
+    def backup(self, backup_path: Path):
         """Save issue Data to backup_path.
 
         Args:
