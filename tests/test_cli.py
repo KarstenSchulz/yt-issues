@@ -1,5 +1,7 @@
 """Test User API (command line interface)."""
+from unittest.mock import Mock, patch
 
+from ytissues import cli
 from ytissues.cli import parse_arguments
 from ytissues.ytlib import trim_filename, trim_pathname
 
@@ -8,6 +10,29 @@ def test_backup_command_respects_project_id():
     args = parse_arguments(["backup", "-i", "0-1", "backup_dir"])
     assert args.project_id == "0-1"
     assert args.backup_dir == "backup_dir"
+
+
+@patch("ytissues.cli.Project", autospec=True)
+@patch("ytissues.cli.get_project")
+def test_single_project_backup(mock_get_project, mock_project):
+    mock_get_project.return_value = mock_project
+    args = parse_arguments(["backup", "-i", "0-1", "backup_dir"])
+    cli.backup(args)
+    mock_get_project.assert_called_once_with(args.project_id)
+    mock_project.backup.assert_called_once_with(args.backup_dir)
+
+
+@patch("ytissues.cli.Project", autospec=True)
+@patch("ytissues.cli.get_projects")
+def test_all_project_backup(mock_get_projects, mock_project):
+    p1, p2, p3 = Mock(), Mock(), Mock()
+    mock_get_projects.return_value = [p1, p2, p3]
+    args = parse_arguments(["backup", "backup_dir"])
+    cli.backup(args)
+    mock_get_projects.assert_called_once()
+    p1.backup.assert_called_once_with(args.backup_dir)
+    p2.backup.assert_called_once_with(args.backup_dir)
+    p3.backup.assert_called_once_with(args.backup_dir)
 
 
 def test_ls_lists_projects_as_list():
