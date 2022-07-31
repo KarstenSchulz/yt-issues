@@ -41,6 +41,24 @@ def test_ls_lists_projects_as_list():
     assert args.table is False
 
 
+@patch("ytissues.cli.print_projects")
+@patch("ytissues.cli.get_projects")
+def test_ls_prints_projects(mock_get_projects, mock_print):
+    p1, p2, p3 = Mock(), Mock(), Mock()
+    mock_get_projects.return_value = [p1, p2, p3]
+    args = parse_arguments(["ls"])
+    cli.ls(args)
+    mock_get_projects.assert_called_with()
+    mock_print.assert_called_with([p1, p2, p3], as_table=False, verbose=False)
+
+
+@patch("ytissues.cli.print_project_details")
+def test_ls_prints_projects_details(mock_print):
+    args = parse_arguments(["ls", "-i", "0-1"])
+    cli.ls(args)
+    mock_print.assert_called_with("0-1", False, False)
+
+
 def test_ls_lists_one_project_as_list():
     args = parse_arguments(["ls", "-i", "0-1"])
     assert args.project_id == "0-1"

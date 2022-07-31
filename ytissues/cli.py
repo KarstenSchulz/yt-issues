@@ -23,7 +23,7 @@ def backup(args):
 def ls(args):
     """List all or print a concrete project on stdout."""
     if args.project_id is None:
-        projects = get_projects(args.project_id)
+        projects = get_projects()
         print_projects(projects, as_table=args.table, verbose=args.verbose)
     else:  # list on project with issues and number of comments and attachments
         print_project_details(args.project_id, args.table, args.verbose)
