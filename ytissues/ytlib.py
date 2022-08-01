@@ -61,26 +61,6 @@ class Project:
     def print_details(self, as_table: bool, verbose: bool):
         """Print Project with issues."""
 
-        def get_issue_data() -> list[str]:
-            if verbose:
-                return [
-                    issue.issue_id,
-                    issue.id_readable,
-                    issue.created.strftime("%Y-%m-%d %H:%M"),
-                    issue.updated.strftime("%Y-%m-%d %H:%M"),
-                    "Yes" if issue.resolved else "No",
-                    issue.summary,
-                    str(issue.comments_count),
-                ]
-            else:
-                return [
-                    issue.issue_id,
-                    issue.created.strftime("%Y-%m-%d %H:%M"),
-                    issue.updated.strftime("%Y-%m-%d %H:%M"),
-                    "Yes" if issue.resolved else "No",
-                    issue.summary,
-                ]
-
         if as_table:
             table = Table(
                 title=f"Project {self.displayname}",
@@ -98,13 +78,13 @@ class Project:
             if verbose:
                 table.add_column("Comments", no_wrap=True)
             for issue in self.issues:
-                table.add_row(*get_issue_data())
+                table.add_row(*get_issue_data(issue, verbose))
             console = Console()
             console.print(table)
         else:
             print("Issue ID;Created;Last Update;Resolved;Summary;Comments")
             for issue in self.issues:
-                print(";".join(get_issue_data()))
+                print(";".join(get_issue_data(issue, verbose)))
 
     def backup(self, backup_pathname: str):
         """Write all Project data to files in the directory 'backup_pathname'.
@@ -434,6 +414,34 @@ class IssueComment:
             return issue_comments
         else:
             raise IOError(f"Error {opened_url.getcode()} receiving data")
+
+
+def get_issue_data(issue: Issue, verbose: bool = False) -> [str]:
+    """Return the fields of issue as list for printing.
+
+    Args:
+        issue: the issue to print
+        verbose: print as rich.table (True) or as csv line (False)
+    """
+
+    if verbose:
+        return [
+            issue.issue_id,
+            issue.id_readable,
+            issue.created.strftime("%Y-%m-%d %H:%M"),
+            issue.updated.strftime("%Y-%m-%d %H:%M"),
+            "Yes" if issue.resolved else "No",
+            issue.summary,
+            str(issue.comments_count),
+        ]
+    else:
+        return [
+            issue.issue_id,
+            issue.created.strftime("%Y-%m-%d %H:%M"),
+            issue.updated.strftime("%Y-%m-%d %H:%M"),
+            "Yes" if issue.resolved else "No",
+            issue.summary,
+        ]
 
 
 def get_request(resource: str, query: str) -> request.Request:

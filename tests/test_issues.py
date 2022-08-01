@@ -4,7 +4,7 @@ from urllib import request
 
 import pytest
 
-from ytissues.ytlib import Issue, Project
+from ytissues.ytlib import Issue, Project, get_issue_data
 
 
 @pytest.fixture
@@ -192,3 +192,20 @@ class TestIssueStructure:
         monkeypatch.setattr(request, "urlopen", mock_urlopen)
         for number, issue in zip((0, 1, 42), project_0_1.issues):
             assert issue.comments_count == number
+
+
+def test_issue_as_csv():
+    a_summary = "An issue to test."
+    issue = Issue(
+        issue_id="2-1",
+        project_id="FIRST-1",
+        id_readable="ISSUE-2-1",
+        created=datetime(2022, 1, 1, 0, 0, 0),
+        updated=datetime(2022, 1, 2, 0, 0, 0),
+        resolved=datetime(2022, 1, 3, 0, 0, 0),
+        summary=a_summary,
+        comments_count=2,
+    )
+    summary = issue.create_summary(a_summary)
+    csv = ["2-1", "2022-01-01 00:00", "2022-01-02 00:00", "Yes", summary]
+    assert csv == get_issue_data(issue, verbose=False)
