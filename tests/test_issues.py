@@ -209,3 +209,28 @@ def test_issue_as_csv():
     summary = issue.create_summary(a_summary)
     csv = ["2-1", "2022-01-01 00:00", "2022-01-02 00:00", "Yes", summary]
     assert csv == get_issue_data(issue, verbose=False)
+
+
+def test_issue_as_csv_verbose():
+    a_summary = "An issue to test."
+    issue = Issue(
+        issue_id="2-1",
+        project_id="FIRST-1",
+        id_readable="ISSUE-2-1",
+        created=datetime(2022, 1, 1, 0, 0, 0),
+        updated=datetime(2022, 1, 2, 0, 0, 0),
+        resolved=datetime(2022, 1, 3, 0, 0, 0),
+        summary=a_summary,
+        comments_count=2,
+    )
+    summary = issue.create_summary(a_summary)
+    csv = [
+        "2-1",
+        "ISSUE-2-1",
+        "2022-01-01 00:00",
+        "2022-01-02 00:00",
+        "Yes",
+        summary,
+        "2",
+    ]
+    assert csv == get_issue_data(issue, verbose=True)
