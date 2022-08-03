@@ -82,7 +82,10 @@ class Project:
             console = Console()
             console.print(table)
         else:
-            print("Issue ID;Created;Last Update;Resolved;Summary;Comments")
+            if verbose:
+                print("Issue ID;Created;Last Update;Resolved;Summary;Comments")
+            else:
+                print("Issue ID;Created;Last Update;Resolved;Summary")
             for issue in self.issues:
                 print(";".join(get_issue_data(issue, verbose)))
 

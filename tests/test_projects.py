@@ -144,3 +144,48 @@ class TestProjectDetails:
 
         monkeypatch.setattr(request, "urlopen", mock_urlopen)
         assert len(project1.issues) == 3
+
+    def test_print_details_as_table(self, project1, monkeypatch, capfd):
+        def mock_urlopen(*args, **kwargs):
+            return MockIssueList()
+
+        monkeypatch.setattr(request, "urlopen", mock_urlopen)
+        project1.print_details(as_table=True, verbose=False)
+        out, err = capfd.readouterr()
+        assert "ID" in out
+        assert "Comments" not in out  # only if verbose
+        assert "Summary" in out
+        assert "third issue" in out
+        assert err == ""
+
+    def test_print_details_as_table_verbose(self, project1, monkeypatch, capfd):
+        def mock_urlopen(*args, **kwargs):
+            return MockIssueList()
+
+        monkeypatch.setattr(request, "urlopen", mock_urlopen)
+        project1.print_details(as_table=True, verbose=True)
+        out, err = capfd.readouterr()
+        assert "Comments" in out
+        assert err == ""
+
+    def test_print_details_as_csv(self, project1, monkeypatch, capfd):
+        def mock_urlopen(*args, **kwargs):
+            return MockIssueList()
+
+        monkeypatch.setattr(request, "urlopen", mock_urlopen)
+        project1.print_details(as_table=False, verbose=False)
+        out, err = capfd.readouterr()
+        assert "Issue ID;Created;Last Update;Resolved;Summary" in out
+        assert "Comments" not in out
+        assert err == ""
+
+    def test_print_details_as_csv_verbose(self, project1, monkeypatch, capfd):
+        def mock_urlopen(*args, **kwargs):
+            return MockIssueList()
+
+        monkeypatch.setattr(request, "urlopen", mock_urlopen)
+        project1.print_details(as_table=False, verbose=True)
+        out, err = capfd.readouterr()
+        assert "Comments" in out
+        assert "42" in out
+        assert err == ""
