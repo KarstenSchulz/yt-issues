@@ -360,7 +360,7 @@ class IssueComment:
         if self.updated:
             infoline += f"updated: {self.updated.strftime('%Y-%m-%d %H:%M')}. "
         else:
-            infoline += "updated: -."
+            infoline += "updated: -"
         infoline += "**\n\n"
         return infoline + self.text
 
