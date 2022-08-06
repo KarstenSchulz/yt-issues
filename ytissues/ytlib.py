@@ -28,7 +28,7 @@ class Project:
     get_item: str = "/youtrack/api/admin/projects/{project_id}"
 
     def __init__(self, project_id: str, shortname: str = None, name: str = None):
-        self.project_id = project_id or None
+        self.project_id = project_id
         self.shortname = shortname or None
         self.name = name or None
         self._issues = None
