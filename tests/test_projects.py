@@ -25,7 +25,7 @@ class TestProjectDisplaynames:
             {"name": "NAME", "plaintext": "P_ID None NAME"},
         ),
         (
-            {"project_id": "", "shortname": "S_NAME", "name": "NAME"},
+            {"project_id": None, "shortname": "S_NAME", "name": "NAME"},
             {"name": "S_NAME", "plaintext": "None S_NAME NAME"},
         ),
     ]
