@@ -117,6 +117,11 @@ class TestProject:
             assert list_5_projects[i].displayname in out
         assert err == ""
 
+    @pytest.mark.skip("Has to be mocket and implemented")
+    def test_creates_correct_backup_path(self, monkeypatch):
+        # p = Project("0-1", "SHORT_PROJECT_NAME", "A little Project")
+        raise NotImplementedError
+
 
 # noinspection PyUnusedLocal
 class TestProjectDetails:
