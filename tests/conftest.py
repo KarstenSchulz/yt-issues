@@ -114,15 +114,54 @@ def project_0_1() -> Project:
 
 
 class MockedIssueResponseEmpty:
-    ISSUELIST = """[]"""
+    ISSUE_LIST = """[]"""
+    STATUS_CODE = 200
 
-    @staticmethod
-    def getcode():
-        return 200
+    def getcode(self):
+        return self.STATUS_CODE
 
-    @staticmethod
-    def read() -> str:
-        return MockedIssueResponseEmpty.ISSUELIST
+    def read(self) -> str:
+        return self.ISSUE_LIST
+
+
+class MockedIssueResponseFilledList(MockedIssueResponseEmpty):
+    ISSUE_LIST = """
+        [
+          {
+            "created": 1637587282538,
+            "description": "Some explanations of the first issue.",
+            "idReadable": "FIRST-1",
+            "summary": "The title of the first issue",
+            "updated": 1654071471241,
+            "resolved": null,
+            "id": "2-1",
+            "commentsCount": 0,
+            "$type": "Issue"
+          },
+          {
+            "created": 1637000282583,
+            "description": "Some explanations of the second issue.",
+            "idReadable": "FIRST-2",
+            "summary": "The title of the second issue",
+            "updated": 1654072471241,
+            "resolved": null,
+            "id": "2-2",
+            "commentsCount": 1,
+            "$type": "Issue"
+          },
+          {
+            "created": 1637460000000,
+            "description": "Some explanations of the third issue.",
+            "idReadable": "FIRST-3",
+            "summary": "The title of the third issue",
+            "updated": 1637990000000,
+            "resolved": 1637990000000,
+            "id": "2-3",
+            "commentsCount": 42,
+            "$type": "Issue"
+          }
+        ]
+    """
 
 
 class MockedIssueResponse:
@@ -231,5 +270,13 @@ def mock_urlopen():
 def empty_issue_list():
     def mocked_urlopen(*args, **kwargs):
         return MockedIssueResponseEmpty()
+
+    return mocked_urlopen
+
+
+@pytest.fixture
+def filled_issue_list():
+    def mocked_urlopen(*args, **kwargs):
+        return MockedIssueResponseFilledList()
 
     return mocked_urlopen
