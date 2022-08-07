@@ -72,6 +72,11 @@ class TestProject:
         assert p1 == p2
         assert p1 != p3
 
+    def test_eq_with_none(self):
+        p1 = Project("0-1")
+        p2 = None
+        assert p1 != p2
+
     def test_project_print(self, capfd):
         p1 = Project("0-1")
         print(p1.as_plaintext())

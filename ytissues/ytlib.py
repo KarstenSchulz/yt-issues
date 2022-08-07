@@ -49,7 +49,10 @@ class Project:
         return self.displayname
 
     def __eq__(self, other):
-        return self.project_id == other.project_id
+        if isinstance(other, Project):
+            return self.project_id == other.project_id
+        else:
+            return False
 
     def as_plaintext(self, verbose=False) -> str:
         """Return one line for ls command."""
