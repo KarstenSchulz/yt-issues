@@ -455,7 +455,7 @@ def get_request(resource: str, query: str) -> request.Request:
 
     Args:
         resource: The api resource, for example `/youtrack/api/admin/projects`
-        query: The GET query string, for example `?fields=id,name,shortName'
+        query: The GET query string, for example `fields=id,name,shortName'
 
     Returns:
         The Request object, ready to use, with headers set.
