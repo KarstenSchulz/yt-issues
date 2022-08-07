@@ -113,6 +113,18 @@ def project_0_1() -> Project:
     return Project(project_id="0-1", shortname="PROJEKT_0_1", name="Projekt 0-1")
 
 
+class MockedIssueResponseEmpty:
+    ISSUELIST = """[]"""
+
+    @staticmethod
+    def getcode():
+        return 200
+
+    @staticmethod
+    def read() -> str:
+        return MockedIssueResponseEmpty.ISSUELIST
+
+
 class MockedIssueResponse:
     EMPTY_ISSUELIST = """[]"""
 
@@ -211,5 +223,13 @@ class MockedIssueList(MockedIssueResponse):
 def mock_urlopen():
     def mocked_urlopen(*args, **kwargs):
         return MockedIssueList()
+
+    return mocked_urlopen
+
+
+@pytest.fixture
+def empty_issue_list(*args, **kwargs):
+    def mocked_urlopen(*args, **kwargs):
+        return MockedIssueResponseEmpty()
 
     return mocked_urlopen

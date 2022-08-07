@@ -135,6 +135,10 @@ class TestProjectDetails:
         monkeypatch.setattr(request, "urlopen", mock_urlopen)
         assert len(project1.issues) == 3
 
+    def test_loads_empty_list_of_issues(self, project1, monkeypatch, empty_issue_list):
+        monkeypatch.setattr(request, "urlopen", empty_issue_list)
+        assert project1.issues == []
+
     def test_print_details_as_table(self, project1, monkeypatch, capfd, mock_urlopen):
         monkeypatch.setattr(request, "urlopen", mock_urlopen)
         project1.print_details(as_table=True, verbose=False)
