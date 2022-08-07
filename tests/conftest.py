@@ -228,7 +228,7 @@ def mock_urlopen():
 
 
 @pytest.fixture
-def empty_issue_list(*args, **kwargs):
+def empty_issue_list():
     def mocked_urlopen(*args, **kwargs):
         return MockedIssueResponseEmpty()
 
