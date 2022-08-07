@@ -6,6 +6,16 @@ import pytest
 from ytissues.ytlib import Project
 
 
+@pytest.fixture
+def yt_url():
+    return os.environ["YT_URL"]
+
+
+@pytest.fixture
+def yt_auth():
+    return os.environ["YT_AUTH"]
+
+
 class MockResponse:
     PROJECT = """
           {
@@ -75,12 +85,6 @@ class MockResponseOneProject(MockResponse):
         return MockResponse.PROJECT
 
 
-class MockedResponseError(MockResponse):
-    @staticmethod
-    def read() -> str:
-        return MockResponse.ERROR_MESSAGE
-
-
 class MockedResponseServerError(MockResponse):
     @staticmethod
     def getcode():
@@ -98,7 +102,15 @@ class MockedResponse:
         return self.RESPONSE
 
 
-class MockedIssueResponseEmpty(MockedResponse):
+class MockedResponseError(MockedResponse):
+    RESPONSE = """{
+  "error": "Not Found",
+  "error_description": "Entity with id NOT_EXISTENT not found"
+}"""
+    STATUS_CODE = 404
+
+
+class MockedResponseEmpty(MockedResponse):
     RESPONSE = """[]"""
     STATUS_CODE = 200
 
@@ -118,14 +130,6 @@ class MockedIssueResponseOneIssue(MockedResponse):
       }
 ]"""
     STATUS_CODE = 200
-
-
-class MockedIssueResponseError(MockedResponse):
-    RESPONSE = """{
-  "error": "Not Found",
-  "error_description": "Entity with id NOT_EXISTENT not found"
-}"""
-    STATUS_CODE = 404
 
 
 class MockedIssueResponseFilledList(MockedResponse):
@@ -197,7 +201,7 @@ def project_0_1() -> Project:
 @pytest.fixture
 def empty_issue_list():
     def mocked_urlopen(*args, **kwargs):
-        return MockedIssueResponseEmpty()
+        return MockedResponseEmpty()
 
     return mocked_urlopen
 
@@ -219,8 +223,8 @@ def filled_issue_list():
 
 
 @pytest.fixture
-def error_issue_list():
+def error_response():
     def mocked_urlopen(*args, **kwargs):
-        return MockedIssueResponseError()
+        return MockedResponseError()
 
     return mocked_urlopen

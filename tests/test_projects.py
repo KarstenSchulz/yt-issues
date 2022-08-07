@@ -146,8 +146,8 @@ class TestProjectDetails:
         monkeypatch.setattr(request, "urlopen", filled_issue_list)
         assert len(project_0_1.issues) == 3
 
-    def test_raises_if_response_error(self, monkeypatch, project_0_1, error_issue_list):
-        monkeypatch.setattr(request, "urlopen", error_issue_list)
+    def test_raises_if_response_error(self, monkeypatch, project_0_1, error_response):
+        monkeypatch.setattr(request, "urlopen", error_response)
         with pytest.raises(IOError):
             assert len(project_0_1.issues) == 3
 
