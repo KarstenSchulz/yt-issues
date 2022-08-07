@@ -2,8 +2,6 @@
 from datetime import datetime
 from urllib import request
 
-import pytest
-
 from ytissues.ytlib import Issue, get_issue_data
 
 
@@ -11,15 +9,6 @@ from ytissues.ytlib import Issue, get_issue_data
 class TestIssueStructure:
     def test_issue_init(self):
         assert Issue(issue_id="", project_id="")
-
-    def test_loads_issue_list(self, monkeypatch, project_0_1, filled_issue_list):
-        monkeypatch.setattr(request, "urlopen", filled_issue_list)
-        assert len(project_0_1.issues) == 3
-
-    def test_raises_if_response_error(self, monkeypatch, project_0_1, error_issue_list):
-        monkeypatch.setattr(request, "urlopen", error_issue_list)
-        with pytest.raises(IOError):
-            assert len(project_0_1.issues) == 3
 
     def test_issue_has_id(self, monkeypatch, project_0_1, filled_issue_list):
         monkeypatch.setattr(request, "urlopen", filled_issue_list)

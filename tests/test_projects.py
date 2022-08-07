@@ -124,31 +124,38 @@ class TestProject:
 
 # noinspection PyUnusedLocal
 class TestProjectDetails:
-    @pytest.fixture
-    def project1(self):
-        return Project("0-1", "FIRST", "First Project")
-
-    def test_get_list_of_issues(self, project1, monkeypatch, filled_issue_list):
+    def test_get_list_of_issues(self, project_0_1, monkeypatch, filled_issue_list):
         monkeypatch.setattr(request, "urlopen", filled_issue_list)
-        assert isinstance(project1.issues, list)
+        assert isinstance(project_0_1.issues, list)
 
-    def test_type_of_first_issue(self, project1, monkeypatch, filled_issue_list):
-        monkeypatch.setattr(request, "urlopen", filled_issue_list)
-        assert isinstance(project1.issues[0], Issue)
-
-    def test_loads_list_of_issues(self, project1, monkeypatch, filled_issue_list):
-        monkeypatch.setattr(request, "urlopen", filled_issue_list)
-        assert len(project1.issues) == 3
-
-    def test_loads_empty_list_of_issues(self, project1, monkeypatch, empty_issue_list):
+    def test_loads_empty_list_of_issues(
+        self, project_0_1, monkeypatch, empty_issue_list
+    ):
         monkeypatch.setattr(request, "urlopen", empty_issue_list)
-        assert project1.issues == []
+        assert project_0_1.issues == []
+
+    def test_loads_one_issue_list(self, monkeypatch, project_0_1, one_issue_list):
+        monkeypatch.setattr(request, "urlopen", one_issue_list)
+        assert len(project_0_1.issues) == 1
+
+    def test_type_of_first_issue(self, project_0_1, monkeypatch, filled_issue_list):
+        monkeypatch.setattr(request, "urlopen", filled_issue_list)
+        assert isinstance(project_0_1.issues[0], Issue)
+
+    def test_loads_issue_list(self, monkeypatch, project_0_1, filled_issue_list):
+        monkeypatch.setattr(request, "urlopen", filled_issue_list)
+        assert len(project_0_1.issues) == 3
+
+    def test_raises_if_response_error(self, monkeypatch, project_0_1, error_issue_list):
+        monkeypatch.setattr(request, "urlopen", error_issue_list)
+        with pytest.raises(IOError):
+            assert len(project_0_1.issues) == 3
 
     def test_print_details_as_table(
-        self, project1, monkeypatch, capfd, filled_issue_list
+        self, project_0_1, monkeypatch, capfd, filled_issue_list
     ):
         monkeypatch.setattr(request, "urlopen", filled_issue_list)
-        project1.print_details(as_table=True, verbose=False)
+        project_0_1.print_details(as_table=True, verbose=False)
         out, err = capfd.readouterr()
         assert "ID" in out
         assert "Comments" not in out  # only if verbose
@@ -157,29 +164,29 @@ class TestProjectDetails:
         assert err == ""
 
     def test_print_details_as_table_verbose(
-        self, project1, monkeypatch, capfd, filled_issue_list
+        self, project_0_1, monkeypatch, capfd, filled_issue_list
     ):
         monkeypatch.setattr(request, "urlopen", filled_issue_list)
-        project1.print_details(as_table=True, verbose=True)
+        project_0_1.print_details(as_table=True, verbose=True)
         out, err = capfd.readouterr()
         assert "Comments" in out
         assert err == ""
 
     def test_print_details_as_csv(
-        self, project1, monkeypatch, capfd, filled_issue_list
+        self, project_0_1, monkeypatch, capfd, filled_issue_list
     ):
         monkeypatch.setattr(request, "urlopen", filled_issue_list)
-        project1.print_details(as_table=False, verbose=False)
+        project_0_1.print_details(as_table=False, verbose=False)
         out, err = capfd.readouterr()
         assert "Issue ID;Created;Last Update;Resolved;Summary" in out
         assert "Comments" not in out
         assert err == ""
 
     def test_print_details_as_csv_verbose(
-        self, project1, monkeypatch, capfd, filled_issue_list
+        self, project_0_1, monkeypatch, capfd, filled_issue_list
     ):
         monkeypatch.setattr(request, "urlopen", filled_issue_list)
-        project1.print_details(as_table=False, verbose=True)
+        project_0_1.print_details(as_table=False, verbose=True)
         out, err = capfd.readouterr()
         assert "Comments" in out
         assert "42" in out

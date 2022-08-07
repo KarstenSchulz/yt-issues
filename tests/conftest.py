@@ -7,7 +7,6 @@ from ytissues.ytlib import Project
 
 
 class MockResponse:
-
     PROJECT = """
           {
             "shortName": "FIRST",
@@ -88,27 +87,49 @@ class MockedResponseServerError(MockResponse):
         return 500
 
 
-class MockedIssueResponseEmpty:
-    ISSUE_LIST = """[]"""
-    STATUS_CODE = 200
+class MockedResponse:
+    RESPONSE = ""
+    STATUS_CODE = 500
 
     def getcode(self):
         return self.STATUS_CODE
 
     def read(self) -> str:
-        return self.ISSUE_LIST
+        return self.RESPONSE
 
 
-class MockedIssueResponseError(MockedIssueResponseEmpty):
-    ISSUE_LIST = """{
+class MockedIssueResponseEmpty(MockedResponse):
+    RESPONSE = """[]"""
+    STATUS_CODE = 200
+
+
+class MockedIssueResponseOneIssue(MockedResponse):
+    RESPONSE = """[
+      {
+        "created": 1637587282538,
+        "description": "Some explanations of the first issue.",
+        "idReadable": "FIRST-1",
+        "summary": "The title of the first issue",
+        "updated": 1654071471241,
+        "resolved": null,
+        "id": "2-1",
+        "commentsCount": 0,
+        "$type": "Issue"
+      }
+]"""
+    STATUS_CODE = 200
+
+
+class MockedIssueResponseError(MockedResponse):
+    RESPONSE = """{
   "error": "Not Found",
   "error_description": "Entity with id NOT_EXISTENT not found"
 }"""
     STATUS_CODE = 404
 
 
-class MockedIssueResponseFilledList(MockedIssueResponseEmpty):
-    ISSUE_LIST = """
+class MockedIssueResponseFilledList(MockedResponse):
+    RESPONSE = """
         [
           {
             "created": 1637587282538,
@@ -146,6 +167,8 @@ class MockedIssueResponseFilledList(MockedIssueResponseEmpty):
         ]
     """
 
+    STATUS_CODE = 200
+
 
 @pytest.fixture(autouse=True)
 def set_environment():
@@ -175,6 +198,14 @@ def project_0_1() -> Project:
 def empty_issue_list():
     def mocked_urlopen(*args, **kwargs):
         return MockedIssueResponseEmpty()
+
+    return mocked_urlopen
+
+
+@pytest.fixture
+def one_issue_list():
+    def mocked_urlopen(*args, **kwargs):
+        return MockedIssueResponseOneIssue()
 
     return mocked_urlopen
 
