@@ -347,7 +347,7 @@ class IssueComment:
         self.author = author
         self.created = created
         self.updated = updated
-        self.text = text
+        self.text = text or ""
         self._attachment_names = None
 
     @property
