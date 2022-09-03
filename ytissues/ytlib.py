@@ -263,7 +263,8 @@ class Issue:
     @staticmethod
     def load(project_id: str) -> list:
         the_request = get_request(
-            Issue.get_list.format(project_id=project_id), f"fields={Issue.fields}"
+            Issue.get_list.format(project_id=project_id),
+            f"fields={Issue.fields}&$top=1000",
         )
         opened_url = request.urlopen(the_request)
         if opened_url.getcode() == 200:
