@@ -1,3 +1,6 @@
+.DS_Store
+yt_backup.sh
+
 /.idea/
 
 # Byte-compiled / optimized / DLL files
