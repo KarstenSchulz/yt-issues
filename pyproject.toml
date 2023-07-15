@@ -1,6 +1,5 @@
 [project]
 name = "ytbackup"
-version = "0.0.2"
 description = "Download Youtrack issues and knowledgebase articles."
 authors = [
     { name = "Karsten Schulz", email = "ks@kaschu.one" }
@@ -8,6 +7,7 @@ authors = [
 license = { file = "LICENSE", content-type = "text/plain" }
 readme = { file = "README.md", content-type = "text/markdown" }
 requires-python = ">=3.11"
+dynamic = ["version"]
 
 dependencies = [
     "rich",
@@ -26,6 +26,9 @@ dev = [
 
 [project.scripts]
 yt = 'ytissues.cli:main'
+
+[tool.setuptools.dynamic]
+version = {attr = "ytissues.VERSION"}
 
 [tool.isort]
 profile = "black"
