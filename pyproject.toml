@@ -1,23 +1,28 @@
-[tool.poetry]
-name = "ytissues"
+[project]
+name = "ytbackup"
 version = "0.0.2"
-description = ""
-authors = ["Karsten Schulz <github@karstenschulz.biz>"]
+description = "Download Youtrack issues and knowledgebase articles."
+authors = ["Karsten Schulz <ks@kaschu.one>"]
 license = "MIT"
+readme = "README.md"
+requires-python = ">=3.11"
 
-[tool.poetry.dependencies]
-python = "^3.10"
-rich = "^12.2.0"
+dependencies = [
+    "rich",
+]
 
-[tool.poetry.dev-dependencies]
-black = "^22.1.0"
-flake8 = {extras = ["mccabe"], version = "^4.0.1"}
-pre-commit = "^2.17.0"
-isort = "^5.10.1"
-pytest = "^7.1.2"
-coverage = {extras = ["toml"], version = "^6.4.1"}
+[project.optional-dependencies]
+dev = [
+    "black",
+    "coverage",
+    "flake8",
+    "isort",
+    "pip-tools",
+    "pre-commit",
+    "pytest",
+]
 
-[tool.poetry.scripts]
+[project.scripts]
 yt = 'ytissues.cli:main'
 
 [tool.isort]
@@ -33,5 +38,8 @@ addopts = "--strict-markers -ra"
 xfail_strict = true
 
 [build-system]
-requires = ["poetry-core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"
+build-backend = "setuptools.build_meta"
+requires = [
+    "setuptools ~=68.0.0",
+    "wheel ~=0.40.0",
+]
