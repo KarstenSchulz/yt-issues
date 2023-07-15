@@ -49,7 +49,7 @@ def parse_arguments(args):
         "-i",
         "--project-id",
         metavar="PROJECT_ID",
-        help="Project ID to backup (eg '0-42'). If ommited, all projects are saved.",
+        help="Project ID to backup (eg '0-42'). If omitted, all projects are saved.",
     )
     backup_parser.set_defaults(func=backup)
     ls_parser = subparsers.add_parser(
