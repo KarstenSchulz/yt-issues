@@ -137,3 +137,4 @@ dmypy.json
 /local/
 /Explore YT API.http
 /http-client.private.env.json
+YT-[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]/
