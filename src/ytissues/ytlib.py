@@ -241,7 +241,7 @@ class Issue:
                 save_file.write_bytes(opened_url.read())
 
     def attachment_list(self) -> str:
-        """Return a markdown-list of attachment names or emptry string."""
+        """Return a markdown-list of attachment names or empty string."""
         attachment_list = ""
         if len(self.attachments) > 0:
             attachment_list += f"There are {len(self.attachments)} attachments:\n"
@@ -356,17 +356,17 @@ class IssueComment:
         raise NotImplementedError
 
     def __str__(self):
-        infoline = f"\n---\n**Comment by {self.author}, "
+        info_line = f"\n---\n**Comment by {self.author}, "
         if self.created:
-            infoline += f"created: {self.created.strftime('%Y-%m-%d %H:%M')}, "
+            info_line += f"created: {self.created.strftime('%Y-%m-%d %H:%M')}, "
         else:
-            infoline += "created: -, "
+            info_line += "created: -, "
         if self.updated:
-            infoline += f"updated: {self.updated.strftime('%Y-%m-%d %H:%M')}. "
+            info_line += f"updated: {self.updated.strftime('%Y-%m-%d %H:%M')}. "
         else:
-            infoline += "updated: -"
-        infoline += "**\n\n"
-        return infoline + self.text
+            info_line += "updated: -"
+        info_line += "**\n\n"
+        return info_line + self.text
 
     def as_text(self) -> str:
         return self.__str__()
@@ -531,7 +531,7 @@ def get_projects(project_id: str = None) -> list[Project]:
 def trim_pathname(pathname: str) -> str:
     """Replace critical chars in `pathname`.
 
-    Repaces critical chars with space and squeezes spaces to one space.
+    Replaces critical chars with space and squeezes spaces to one space.
 
     Args:
          pathname: A relative or absolute pathname to backup the project.
@@ -545,7 +545,7 @@ def trim_pathname(pathname: str) -> str:
 def trim_filename(filename: str) -> str:
     """Replace critical chars in `filename`.
 
-    Repaces chars with space and squeezes spaces to one space.
+    Replaces chars with space and squeezes spaces to one space.
 
     Args:
          filename: A filename to use to write to the filesystem. Can be the summary
