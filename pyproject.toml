@@ -2,9 +2,11 @@
 name = "ytbackup"
 version = "0.0.2"
 description = "Download Youtrack issues and knowledgebase articles."
-authors = ["Karsten Schulz <ks@kaschu.one>"]
-license = "MIT"
-readme = "README.md"
+authors = [
+    { name = "Karsten Schulz", email = "ks@kaschu.one" }
+]
+license = { file = "LICENSE", content-type = "text/plain" }
+readme = { file = "README.md", content-type = "text/markdown" }
 requires-python = ">=3.11"
 
 dependencies = [
@@ -30,7 +32,7 @@ profile = "black"
 
 [tool.coverage.run]
 branch = true
-source = ["ytissues"]
+source = ["src"]
 
 [tool.pytest.ini_options]
 minversion = "7.1"
@@ -43,3 +45,41 @@ requires = [
     "setuptools ~=68.0.0",
     "wheel ~=0.40.0",
 ]
+
+[tool.black]
+target-version = ['py311']
+line-length = 88
+
+[tool.ruff]
+line-length = 88
+# Enable Pyflakes `E` and `F` codes by default.
+select = ["E", "F", "Q", "W"]
+ignore = ["F403", "F405"]
+
+# Exclude a variety of commonly ignored directories.
+exclude = [
+    ".eggs",
+    ".git",
+    ".ruff_cache",
+    ".tox",
+    ".venv",
+    "__pypackages__",
+    "_build",
+    "build",
+    "dist",
+    "venv",
+    "migrations",
+]
+
+# Allow unused variables when underscore-prefixed.
+dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+
+# Assume Python 3.11
+target-version = "py311"
+
+[tool.ruff.mccabe]
+# Unlike Flake8, default to a complexity level of 10.
+max-complexity = 10
+
+[tool.ruff.per-file-ignores]
+"add_testusers_for_stage.py" = ["E402"]
