@@ -23,6 +23,12 @@ This tool can be useful for:
 
 ## Roadmap
 
+### Currently in development (0.0.4) (see )
+
+- Attention: Python
+- First versions of `yt ls` and `yt backup` implemented.
+- next: Research für asyncio / aiohttp on the way to speed up things
+
 ### Version 0.1.0 (MVP implemented, tests needed)
 - `yt ls PROJECT [PROJECT ...]` - if no PROJECT given: list all open projects, otherwise list open (or all) issues of PROJECT to stdout (ID, Title, State).
 - `yt backup YT_BACKUP_DIR` - Download all issues with attachments of all project to subdirs in YT_BACKUP_DIR in a readable format, which means markdown files with attachments in their corresponding attachment directories.
