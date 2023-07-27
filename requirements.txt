@@ -11,4 +11,4 @@ mdurl==0.1.2
 pygments==2.15.1
     # via rich
 rich==13.4.2
-    # via ytbackup (pyproject.toml)
+    # via ytissues (pyproject.toml)
