@@ -1,5 +1,5 @@
 [project]
-name = "ytbackup"
+name = "ytissues"
 description = "Download Youtrack issues and knowledgebase articles."
 authors = [
     { name = "Karsten Schulz", email = "ks@kaschu.one" }
