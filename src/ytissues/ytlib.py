@@ -214,8 +214,10 @@ class Issue:
         Args:
             backup_path: the pathlib.Path to the backup directory.
         """
+        issue_path = backup_path / Path(self.summary)
+        issue_path.mkdir(parents=True, exist_ok=True)
         filename = self.summary + ".md"
-        filepath = backup_path / Path(filename)
+        filepath = issue_path / Path(filename)
         if self.resolved:
             resolved_text = f"Resolved: {self.resolved.strftime('%Y-%m-%d %H:%M')}.\n"
         else:
@@ -233,7 +235,7 @@ class Issue:
         filepath.write_text(issue_text)
         if len(self.attachments) > 0:
             yt_url = os.environ["YT_URL"]
-            attachment_dir = backup_path / f"{self.summary}_attachments"
+            attachment_dir = issue_path / f"{self.summary}_attachments"
             attachment_dir.mkdir(exist_ok=True)
             for attachment in self.attachments:
                 save_file = attachment_dir / attachment.name
