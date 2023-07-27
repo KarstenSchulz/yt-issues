@@ -23,9 +23,11 @@ This tool can be useful for:
 
 ## Roadmap
 
-### Currently in development (0.0.4) (see )
+### Currently in development (0.0.4)
 
-- Attention: Python
+(see version info in ytissues.VERSION)
+
+- Attention: We switched from poetry (0.0.3) to pip / pip-tools (since 0.0.4)
 - First versions of `yt ls` and `yt backup` implemented.
 - next: Research für asyncio / aiohttp on the way to speed up things
 
