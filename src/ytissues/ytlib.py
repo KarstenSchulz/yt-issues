@@ -235,10 +235,8 @@ class Issue:
         filepath.write_text(issue_text)
         if len(self.attachments) > 0:
             yt_url = os.environ["YT_URL"]
-            attachment_dir = issue_path / f"{self.summary}_attachments"
-            attachment_dir.mkdir(exist_ok=True)
             for attachment in self.attachments:
-                save_file = attachment_dir / attachment.name
+                save_file = issue_path / attachment.name
                 opened_url = request.urlopen(yt_url + attachment.url)
                 save_file.write_bytes(opened_url.read())
 
