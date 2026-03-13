@@ -82,7 +82,7 @@ List projects or issues.
 export YT_URL="https://example-server.myjetbrains.com"
 export YT_AUTH="perm:secretexample_blafasel_yadda.422373..."
 
-# Example of a verbose table:
+# Example of a verbose project table:
 ❯ yt ls -t -v
 Getting info... ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:00:02
                    List of projects
@@ -102,6 +102,26 @@ Getting info... ━━━━━━━━━━━━━━━━━━━━━�
 │ 0-22 │ ZENITH           │ zenith           │ 0      │
 ╰──────┴──────────────────┴──────────────────┴────────╯
                  11 projects in total
+
+# Example of an issue table for project ORBIT
+❯ yt ls -t -i 0-02
+                                                    Project ORBIT
+╭────────┬──────────────────┬──────────────────┬──────────┬──────────────────────────────────────────────────────────╮
+│     ID │     Created      │   Last Update    │ Resolved │ Summary                                                  │
+├────────┼──────────────────┼──────────────────┼──────────┼──────────────────────────────────────────────────────────┤
+│  2-658 │ 2022-10-09 08:48 │ 2023-04-25 07:47 │    No    │ 2022-10-09 ORBIT-2 - ORBIT - Gutschriftserzeugung        │
+│        │                  │                  │          │ implementieren                                           │
+│  2-660 │ 2022-10-09 08:49 │ 2023-04-25 07:47 │    No    │ 2022-10-09 ORBIT-3 - ORBIT - Einzelrechnung erstellen    │
+│        │                  │                  │          │ implementieren                                           │
+│  2-662 │ 2022-10-09 08:52 │ 2023-04-25 07:47 │    No    │ 2022-10-09 ORBIT-4 - ORBIT - Aufbereitung der Daten      │
+│        │                  │                  │          │ refaktorieren, Tests schreiben                           │
+│  2-734 │ 2022-12-04 10:12 │ 2023-07-19 16:21 │   Yes    │ 2022-12-04 ORBIT-5 - ORBIT - Ablage der Monatsrechnungen │
+│        │                  │                  │          │ der Rechnungsdateien (*.pdf, *.tex, *.json)              │
+│        │                  │                  │          │ automatisieren                                           │
+│ 2-1331 │ 2024-07-14 16:24 │ 2024-07-14 16:24 │    No    │ 2024-07-14 ORBIT-6 - ZUGFeRD implementieren              │
+╰────────┴──────────────────┴──────────────────┴──────────┴──────────────────────────────────────────────────────────╯
+                                                  5 issues in total
+
 ```
 
 #### `yt backup`
