@@ -72,6 +72,11 @@ If you use the bash shell, enter a line like `export YT_AUTH=perm:ABCD42efg...` 
 
 You must also set the environment variable YT_URL to the base URL of your YouTrack service as described in https://www.jetbrains.com/help/youtrack/devportal/api-url-and-endpoints.html.
 
+Examples for YT_URL:
+- `https://myserver.intern/youtrack` (if hosted under the /youtrack path)
+- `https://youtrack.myserver.intern` (if hosted as a subdomain)
+- `http://192.168.178.123:8080` (if hosted on a local IP with port)
+
 You can also set the environment on the command line when calling the command like so:
 ```shell
 YT_AUTH=perm:ABCD42efg... YT_URL=https://... yt

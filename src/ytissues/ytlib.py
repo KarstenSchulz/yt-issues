@@ -4,6 +4,7 @@ Library for retrieving issues from the youtrack service.
 Get data from https://www.jetbrains.com/help/youtrack/devportal/youtrack-rest-api.html
 
 """
+
 import json
 import os
 import re
@@ -24,8 +25,8 @@ class Project:
 
     """
 
-    get_list: str = "/youtrack/api/admin/projects"
-    get_item: str = "/youtrack/api/admin/projects/{project_id}"
+    get_list: str = "/api/admin/projects"
+    get_item: str = "/api/admin/projects/{project_id}"
 
     def __init__(self, project_id: str, shortname: str = None, name: str = None):
         self.project_id = project_id
@@ -115,8 +116,8 @@ class Issue:
     When instantiated, it loads the missing values from the YT service.
     """
 
-    get_list: str = "/youtrack/api/admin/projects/{project_id}/issues"
-    get_item: str = "/youtrack/api/issues/{issue_id}"
+    get_list: str = "/api/admin/projects/{project_id}/issues"
+    get_item: str = "/api/issues/{issue_id}"
 
     fields = "id,idReadable,created,updated,resolved,summary,description,commentsCount"
 
@@ -171,7 +172,11 @@ class Issue:
             IssueAttachment.get_list.format(issue_id=self.issue_id),
             f"fields={IssueAttachment.fields}",
         )
-        opened_url = request.urlopen(the_request)
+        try:
+            opened_url = request.urlopen(the_request)
+        except TimeoutError:
+            print(f"Timeout trying to fetch attachment {self.issue_id}")
+            return []
         if opened_url.getcode() == 200:
             data = opened_url.read()
             json_data = json.loads(data)
@@ -312,7 +317,7 @@ class Issue:
 class IssueAttachment:
     """Represents an Attachment to the issue (Name and link, not the data!)."""
 
-    get_list = "/youtrack/api/issues/{issue_id}/attachments"
+    get_list = "/api/issues/{issue_id}/attachments"
     fields = "name,size,mimeType,extension,charset,url"
 
     def __init__(self, issue_id, name, size, mimetype, extension, charset, url):
@@ -331,8 +336,8 @@ class IssueComment:
     When instantiated, it loads the missing values from the YT service.
     """
 
-    get_list: str = "/youtrack/api/issues/{issue_id}/comments"
-    get_item: str = "/youtrack/api/issues/{issue_id}/comments/{commentID}"
+    get_list: str = "/api/issues/{issue_id}/comments"
+    get_item: str = "/api/issues/{issue_id}/comments/{commentID}"
 
     fields = "id,text,created,updated,author(name),attachments(id,name)"
 
@@ -455,7 +460,7 @@ def get_request(resource: str, query: str) -> request.Request:
     """Return a Request object for the YT service.
 
     Args:
-        resource: The api resource, for example `/youtrack/api/admin/projects`
+        resource: The api resource, for example `/api/admin/projects`
         query: The GET query string, for example `fields=id,name,shortName'
 
     Returns:
@@ -469,10 +474,11 @@ def get_request(resource: str, query: str) -> request.Request:
     yt_url = os.environ["YT_URL"]
     yt_auth = os.environ["YT_AUTH"]
     # check the data:
-    if resource.endswith("/"):
-        raise ValueError(f"YT_URL must not end with '/': {yt_url}")
+    if yt_url.endswith("/"):
+        yt_url = yt_url[:-1]
     if not resource.startswith("/"):
-        raise ValueError(f"Resource must start with '/': {resource}")
+        resource = f"/{resource}"
+
     if query.startswith("?"):
         raise ValueError(f"Query must not start with '?': {query}")
     if query and not query.startswith("fields="):

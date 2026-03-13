@@ -1,20 +1,21 @@
 """Test request objects, urls and mocked API calls."""
+
 import os
 from urllib import request
 
 import pytest
 
-from ytissues.ytlib import get_projects, get_request
+from ytissues.ytlib import Project, get_projects, get_request
 
 
 def test_test_environment_is_set():
-    assert os.environ["YT_URL"] == "https://not.a.valid.host/to_test/youtrack"
+    assert os.environ["YT_URL"] == "https://not.a.valid.host/to_test"
     assert os.environ["YT_AUTH"] == "perm:not-a-valid-authorization"
 
 
-def test_get_request_raises_missing_slash(yt_url, yt_auth):
-    with pytest.raises(ValueError):
-        get_request("resource", "query")
+def test_get_request_adds_missing_slash(yt_url, yt_auth):
+    the_request = get_request("resource", "fields=test")
+    assert the_request.full_url == f"{yt_url}/resource?fields=test"
 
 
 def test_get_request_raises_question_mark(yt_url, yt_auth):
@@ -25,6 +26,16 @@ def test_get_request_raises_question_mark(yt_url, yt_auth):
 def test_get_request_correct_url(yt_url, yt_auth):
     the_request = get_request("/resource", "fields=test")
     assert the_request.full_url == f"{yt_url}/resource?fields=test"
+
+
+def test_get_request_no_youtrack_prefix(monkeypatch):
+    """Ensure that the URL does not contain /youtrack twice or unexpectedly."""
+    monkeypatch.setenv("YT_URL", "https://youtrack.myserver.intern")
+    r = get_request(Project.get_list, "fields=id,name,shortName")
+    assert (
+        r.full_url == "https://youtrack.myserver.intern"
+        "/api/admin/projects?fields=id,name,shortName"
+    )
 
 
 # noinspection PyUnusedLocal
@@ -53,10 +64,14 @@ class TestGetProjects:
             _ = get_projects(project_id="raises Server Error")
 
     def test_get_request_request_is_well_formed(self):
-        with pytest.raises(ValueError):
-            _ = get_request("please_no_trailing_slash/", "")
-        with pytest.raises(ValueError):
-            _ = get_request("please_start_with_slash", "")
+        # trailing slash on resource is currently ok (though maybe not intended by user)
+        r = get_request("/path/", "")
+        assert r.full_url == f"{os.environ['YT_URL']}/path/"
+
+        # missing start slash is auto-added
+        r = get_request("path", "")
+        assert r.full_url == f"{os.environ['YT_URL']}/path"
+
         with pytest.raises(ValueError):
             _ = get_request("/please_do_not_start_query_with_?", "?_is_wrong")
 
