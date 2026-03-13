@@ -90,7 +90,7 @@ Getting info... ━━━━━━━━━━━━━━━━━━━━━�
 │   ID │ Short Name       │ Name             │ Issues │
 ├──────┼──────────────────┼──────────────────┼────────┤
 │ 0-01 │ NOVA             │ nova-core        │ 42     │
-│ 0-02 │ ORBIT            │ orbit            │ 0      │
+│ 0-02 │ ORBIT            │ orbit            │ 5      │
 │ 0-03 │ SKYFORGE         │ skyforge         │ 118    │
 │ 0-04 │ PHANTOM          │ phantom          │ 7      │
 │ 0-05 │ ZEPHYR           │ zephyr           │ 0      │
