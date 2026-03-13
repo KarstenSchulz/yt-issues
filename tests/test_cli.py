@@ -1,4 +1,5 @@
 """Test User API (command line interface)."""
+
 from unittest.mock import Mock, patch
 
 from ytissues import cli
@@ -99,3 +100,16 @@ def test_trim_pathname_function():
         ("A_/_B", "A_/_B"),
     ]:
         assert trim_pathname(source) == converted
+
+
+def test_version_option(capsys):
+    import pytest
+
+    from ytissues import VERSION
+
+    with pytest.raises(SystemExit) as e:
+        parse_arguments(["--version"])
+    assert e.value.code == 0
+    captured = capsys.readouterr()
+    # Argparse usually prints version to stdout (since 3.4+)
+    assert VERSION in captured.out or VERSION in captured.err

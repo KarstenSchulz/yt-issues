@@ -1,3 +1,3 @@
 """ytissues lib an command line tools."""
 
-VERSION = "0.0.5"
+VERSION = "0.0.6"

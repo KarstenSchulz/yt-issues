@@ -6,6 +6,7 @@ from rich.console import Console
 from rich.progress import track
 from rich.table import Table
 
+from ytissues import VERSION
 from ytissues.ytlib import Project, get_project, get_projects
 
 
@@ -31,6 +32,7 @@ def ls(args):
 
 def parse_arguments(args):
     parser = argparse.ArgumentParser()
+    parser.add_argument("--version", action="version", version=f"%(prog)s {VERSION}")
     subparsers = parser.add_subparsers(
         description="Use the following commands to retrieve project names or issues "
         + "from a Youtrack service.",
